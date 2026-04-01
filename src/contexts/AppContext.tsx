@@ -1,6 +1,7 @@
 import React, {
   createContext, useContext, useState, useEffect, useCallback, PropsWithChildren
 } from 'react';
+import { ALL_LISTINGS } from '../data/listings';
 import type {
   UserProfile, Listing, ListingStatus, MessageThread, Message, SearchFilters
 } from '../types';
@@ -36,6 +37,7 @@ export const INITIAL_USER: UserProfile = {
 const NOW = Date.now();
 const DAY = 86_400_000;
 
+// Legacy - see src/data/listings.ts
 export const DEMO_LISTINGS: Listing[] = [
   {
     id:'1', title:'Appartement F4 Haut Standing — Hydra, Alger',
@@ -163,8 +165,8 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
   const [user]      = useState<UserProfile | null>(() => hydrate('fennec_user', null));
   const [userState, setUser] = useState<UserProfile | null>(user);
   const [listings,  setListings]  = useState<Listing[]>(() => {
-    const saved = hydrate<Listing[] | null>('fennec_listings', null);
-    return saved?.length ? saved : DEMO_LISTINGS;
+    // Always use ALL_LISTINGS as the base catalog
+    return ALL_LISTINGS;
   });
   const [favorites, setFavorites] = useState<string[]>(() => hydrate('fennec_favorites', []));
   const [threads,   setThreads]   = useState<MessageThread[]>(() => hydrate('fennec_threads', []));
