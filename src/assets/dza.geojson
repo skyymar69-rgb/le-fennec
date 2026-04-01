@@ -1,0 +1,2549 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "01",
+        "nameFr": "Adrar",
+        "nameAr": "أدرار",
+        "nameEn": "Adrar"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -2.2,
+              27.8
+            ],
+            [
+              -2.2,
+              29.5
+            ],
+            [
+              0.5,
+              29.5
+            ],
+            [
+              2.8,
+              29.2
+            ],
+            [
+              2.8,
+              27.5
+            ],
+            [
+              -0.5,
+              26.8
+            ],
+            [
+              -2.2,
+              27.8
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "02",
+        "nameFr": "Chlef",
+        "nameAr": "الشلف",
+        "nameEn": "Chlef"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              1.0,
+              36.5
+            ],
+            [
+              2.2,
+              36.7
+            ],
+            [
+              2.5,
+              36.2
+            ],
+            [
+              2.2,
+              35.8
+            ],
+            [
+              1.2,
+              35.9
+            ],
+            [
+              0.9,
+              36.2
+            ],
+            [
+              1.0,
+              36.5
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "03",
+        "nameFr": "Laghouat",
+        "nameAr": "الأغواط",
+        "nameEn": "Laghouat"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2.0,
+              33.0
+            ],
+            [
+              3.5,
+              33.5
+            ],
+            [
+              4.0,
+              33.0
+            ],
+            [
+              3.8,
+              32.0
+            ],
+            [
+              2.5,
+              31.8
+            ],
+            [
+              1.8,
+              32.3
+            ],
+            [
+              2.0,
+              33.0
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "04",
+        "nameFr": "Oum El Bouaghi",
+        "nameAr": "أم البواقي",
+        "nameEn": "Oum El Bouaghi"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              7.0,
+              35.8
+            ],
+            [
+              8.0,
+              36.0
+            ],
+            [
+              8.5,
+              35.6
+            ],
+            [
+              8.2,
+              35.2
+            ],
+            [
+              7.2,
+              35.1
+            ],
+            [
+              6.8,
+              35.4
+            ],
+            [
+              7.0,
+              35.8
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "05",
+        "nameFr": "Batna",
+        "nameAr": "باتنة",
+        "nameEn": "Batna"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              5.5,
+              35.8
+            ],
+            [
+              6.8,
+              36.0
+            ],
+            [
+              7.2,
+              35.6
+            ],
+            [
+              7.0,
+              34.8
+            ],
+            [
+              6.0,
+              34.5
+            ],
+            [
+              5.2,
+              35.0
+            ],
+            [
+              5.5,
+              35.8
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "06",
+        "nameFr": "Béjaïa",
+        "nameAr": "بجاية",
+        "nameEn": "Béjaia"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              4.5,
+              36.8
+            ],
+            [
+              5.5,
+              37.0
+            ],
+            [
+              6.0,
+              36.6
+            ],
+            [
+              5.8,
+              36.2
+            ],
+            [
+              4.8,
+              36.1
+            ],
+            [
+              4.2,
+              36.5
+            ],
+            [
+              4.5,
+              36.8
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "07",
+        "nameFr": "Biskra",
+        "nameAr": "بسكرة",
+        "nameEn": "Biskra"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              5.2,
+              35.0
+            ],
+            [
+              6.8,
+              35.2
+            ],
+            [
+              7.2,
+              34.8
+            ],
+            [
+              7.0,
+              33.5
+            ],
+            [
+              5.5,
+              33.2
+            ],
+            [
+              4.8,
+              33.8
+            ],
+            [
+              5.2,
+              35.0
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "08",
+        "nameFr": "Béchar",
+        "nameAr": "بشار",
+        "nameEn": "Béchar"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -3.0,
+              30.5
+            ],
+            [
+              -1.5,
+              31.0
+            ],
+            [
+              0.0,
+              30.8
+            ],
+            [
+              0.2,
+              28.5
+            ],
+            [
+              -1.0,
+              27.5
+            ],
+            [
+              -3.0,
+              27.8
+            ],
+            [
+              -3.0,
+              30.5
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "09",
+        "nameFr": "Blida",
+        "nameAr": "البليدة",
+        "nameEn": "Blida"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2.5,
+              36.7
+            ],
+            [
+              3.2,
+              36.8
+            ],
+            [
+              3.5,
+              36.4
+            ],
+            [
+              3.2,
+              36.1
+            ],
+            [
+              2.5,
+              36.2
+            ],
+            [
+              2.3,
+              36.4
+            ],
+            [
+              2.5,
+              36.7
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "10",
+        "nameFr": "Bouira",
+        "nameAr": "البويرة",
+        "nameEn": "Bouira"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              3.5,
+              36.5
+            ],
+            [
+              4.5,
+              36.6
+            ],
+            [
+              4.8,
+              36.2
+            ],
+            [
+              4.5,
+              35.8
+            ],
+            [
+              3.5,
+              35.9
+            ],
+            [
+              3.2,
+              36.2
+            ],
+            [
+              3.5,
+              36.5
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "11",
+        "nameFr": "Tamanrasset",
+        "nameAr": "تمنراست",
+        "nameEn": "Tamanrasset"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              3.5,
+              22.5
+            ],
+            [
+              4.0,
+              23.5
+            ],
+            [
+              8.0,
+              24.0
+            ],
+            [
+              9.5,
+              22.0
+            ],
+            [
+              8.0,
+              19.5
+            ],
+            [
+              4.0,
+              19.0
+            ],
+            [
+              3.5,
+              22.5
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "12",
+        "nameFr": "Tébessa",
+        "nameAr": "تبسة",
+        "nameEn": "Tébessa"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              7.5,
+              35.5
+            ],
+            [
+              8.5,
+              35.8
+            ],
+            [
+              8.8,
+              35.4
+            ],
+            [
+              8.5,
+              34.0
+            ],
+            [
+              7.5,
+              33.8
+            ],
+            [
+              7.0,
+              34.5
+            ],
+            [
+              7.5,
+              35.5
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "13",
+        "nameFr": "Tlemcen",
+        "nameAr": "تلمسان",
+        "nameEn": "Tlemcen"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -2.2,
+              35.2
+            ],
+            [
+              -1.0,
+              35.5
+            ],
+            [
+              -0.5,
+              35.0
+            ],
+            [
+              -0.8,
+              34.5
+            ],
+            [
+              -2.0,
+              34.4
+            ],
+            [
+              -2.5,
+              34.8
+            ],
+            [
+              -2.2,
+              35.2
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "14",
+        "nameFr": "Tiaret",
+        "nameAr": "تيارت",
+        "nameEn": "Tiaret"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              0.5,
+              35.8
+            ],
+            [
+              1.8,
+              36.0
+            ],
+            [
+              2.2,
+              35.5
+            ],
+            [
+              2.0,
+              34.8
+            ],
+            [
+              0.8,
+              34.6
+            ],
+            [
+              0.3,
+              35.2
+            ],
+            [
+              0.5,
+              35.8
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "15",
+        "nameFr": "Tizi Ouzou",
+        "nameAr": "تيزي وزو",
+        "nameEn": "Tizi Ouzou"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              3.5,
+              36.7
+            ],
+            [
+              4.5,
+              37.0
+            ],
+            [
+              5.0,
+              36.6
+            ],
+            [
+              4.8,
+              36.2
+            ],
+            [
+              3.8,
+              36.1
+            ],
+            [
+              3.3,
+              36.5
+            ],
+            [
+              3.5,
+              36.7
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "16",
+        "nameFr": "Alger",
+        "nameAr": "الجزائر",
+        "nameEn": "Algiers"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2.9,
+              36.7
+            ],
+            [
+              3.3,
+              36.9
+            ],
+            [
+              3.5,
+              36.7
+            ],
+            [
+              3.3,
+              36.4
+            ],
+            [
+              3.0,
+              36.5
+            ],
+            [
+              2.9,
+              36.7
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "17",
+        "nameFr": "Djelfa",
+        "nameAr": "الجلفة",
+        "nameEn": "Djelfa"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2.0,
+              34.8
+            ],
+            [
+              3.5,
+              35.0
+            ],
+            [
+              4.0,
+              34.5
+            ],
+            [
+              3.8,
+              33.2
+            ],
+            [
+              2.2,
+              33.0
+            ],
+            [
+              1.8,
+              33.8
+            ],
+            [
+              2.0,
+              34.8
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "18",
+        "nameFr": "Jijel",
+        "nameAr": "جيجل",
+        "nameEn": "Jijel"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              5.5,
+              37.0
+            ],
+            [
+              6.5,
+              37.2
+            ],
+            [
+              6.8,
+              36.8
+            ],
+            [
+              6.5,
+              36.4
+            ],
+            [
+              5.5,
+              36.4
+            ],
+            [
+              5.2,
+              36.8
+            ],
+            [
+              5.5,
+              37.0
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "19",
+        "nameFr": "Sétif",
+        "nameAr": "سطيف",
+        "nameEn": "Sétif"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              4.8,
+              36.2
+            ],
+            [
+              6.0,
+              36.5
+            ],
+            [
+              6.5,
+              36.0
+            ],
+            [
+              6.2,
+              35.5
+            ],
+            [
+              4.8,
+              35.4
+            ],
+            [
+              4.5,
+              35.8
+            ],
+            [
+              4.8,
+              36.2
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "20",
+        "nameFr": "Saïda",
+        "nameAr": "سعيدة",
+        "nameEn": "Saïda"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -0.5,
+              34.8
+            ],
+            [
+              0.5,
+              35.2
+            ],
+            [
+              0.8,
+              34.8
+            ],
+            [
+              0.5,
+              34.0
+            ],
+            [
+              -0.3,
+              33.8
+            ],
+            [
+              -0.8,
+              34.3
+            ],
+            [
+              -0.5,
+              34.8
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "21",
+        "nameFr": "Skikda",
+        "nameAr": "سكيكدة",
+        "nameEn": "Skikda"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              6.5,
+              37.0
+            ],
+            [
+              7.5,
+              37.0
+            ],
+            [
+              7.8,
+              36.6
+            ],
+            [
+              7.5,
+              36.2
+            ],
+            [
+              6.5,
+              36.2
+            ],
+            [
+              6.2,
+              36.7
+            ],
+            [
+              6.5,
+              37.0
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "22",
+        "nameFr": "Sidi Bel Abbès",
+        "nameAr": "سيدي بلعباس",
+        "nameEn": "Sidi Bel Abbès"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -1.2,
+              35.2
+            ],
+            [
+              0.0,
+              35.5
+            ],
+            [
+              0.3,
+              35.0
+            ],
+            [
+              0.0,
+              34.4
+            ],
+            [
+              -1.0,
+              34.3
+            ],
+            [
+              -1.5,
+              34.8
+            ],
+            [
+              -1.2,
+              35.2
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "23",
+        "nameFr": "Annaba",
+        "nameAr": "عنابة",
+        "nameEn": "Annaba"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              7.5,
+              37.0
+            ],
+            [
+              8.5,
+              37.0
+            ],
+            [
+              8.5,
+              36.5
+            ],
+            [
+              8.0,
+              36.2
+            ],
+            [
+              7.3,
+              36.3
+            ],
+            [
+              7.2,
+              36.8
+            ],
+            [
+              7.5,
+              37.0
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "24",
+        "nameFr": "Guelma",
+        "nameAr": "قالمة",
+        "nameEn": "Guelma"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              7.0,
+              36.8
+            ],
+            [
+              8.0,
+              37.0
+            ],
+            [
+              8.5,
+              36.5
+            ],
+            [
+              8.2,
+              36.0
+            ],
+            [
+              7.0,
+              36.0
+            ],
+            [
+              6.8,
+              36.5
+            ],
+            [
+              7.0,
+              36.8
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "25",
+        "nameFr": "Constantine",
+        "nameAr": "قسنطينة",
+        "nameEn": "Constantine"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              6.2,
+              36.5
+            ],
+            [
+              7.0,
+              36.8
+            ],
+            [
+              7.2,
+              36.4
+            ],
+            [
+              7.0,
+              35.8
+            ],
+            [
+              6.2,
+              35.8
+            ],
+            [
+              5.8,
+              36.2
+            ],
+            [
+              6.2,
+              36.5
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "26",
+        "nameFr": "Médéa",
+        "nameAr": "المدية",
+        "nameEn": "Médéa"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2.2,
+              36.2
+            ],
+            [
+              3.2,
+              36.5
+            ],
+            [
+              3.5,
+              36.0
+            ],
+            [
+              3.2,
+              35.5
+            ],
+            [
+              2.2,
+              35.4
+            ],
+            [
+              1.8,
+              35.8
+            ],
+            [
+              2.2,
+              36.2
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "27",
+        "nameFr": "Mostaganem",
+        "nameAr": "مستغانم",
+        "nameEn": "Mostaganem"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              0.0,
+              36.0
+            ],
+            [
+              1.0,
+              36.3
+            ],
+            [
+              1.5,
+              36.0
+            ],
+            [
+              1.2,
+              35.6
+            ],
+            [
+              0.2,
+              35.6
+            ],
+            [
+              -0.2,
+              35.8
+            ],
+            [
+              0.0,
+              36.0
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "28",
+        "nameFr": "M'Sila",
+        "nameAr": "المسيلة",
+        "nameEn": "M'Sila"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              3.8,
+              35.8
+            ],
+            [
+              5.0,
+              36.0
+            ],
+            [
+              5.5,
+              35.5
+            ],
+            [
+              5.2,
+              34.5
+            ],
+            [
+              3.8,
+              34.2
+            ],
+            [
+              3.3,
+              34.8
+            ],
+            [
+              3.8,
+              35.8
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "29",
+        "nameFr": "Mascara",
+        "nameAr": "معسكر",
+        "nameEn": "Mascara"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -0.2,
+              35.6
+            ],
+            [
+              1.0,
+              35.8
+            ],
+            [
+              1.3,
+              35.3
+            ],
+            [
+              1.0,
+              34.8
+            ],
+            [
+              -0.2,
+              34.6
+            ],
+            [
+              -0.5,
+              35.2
+            ],
+            [
+              -0.2,
+              35.6
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "30",
+        "nameFr": "Ouargla",
+        "nameAr": "ورقلة",
+        "nameEn": "Ouargla"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              4.8,
+              32.0
+            ],
+            [
+              7.0,
+              32.5
+            ],
+            [
+              7.5,
+              31.0
+            ],
+            [
+              6.0,
+              29.0
+            ],
+            [
+              4.0,
+              29.5
+            ],
+            [
+              3.5,
+              31.0
+            ],
+            [
+              4.8,
+              32.0
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "31",
+        "nameFr": "Oran",
+        "nameAr": "وهران",
+        "nameEn": "Oran"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -1.2,
+              36.0
+            ],
+            [
+              0.0,
+              36.2
+            ],
+            [
+              0.2,
+              35.8
+            ],
+            [
+              0.0,
+              35.4
+            ],
+            [
+              -1.0,
+              35.4
+            ],
+            [
+              -1.5,
+              35.8
+            ],
+            [
+              -1.2,
+              36.0
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "32",
+        "nameFr": "El Bayadh",
+        "nameAr": "البيض",
+        "nameEn": "El Bayadh"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -1.5,
+              33.8
+            ],
+            [
+              0.5,
+              34.2
+            ],
+            [
+              1.0,
+              33.5
+            ],
+            [
+              0.5,
+              32.2
+            ],
+            [
+              -1.0,
+              32.0
+            ],
+            [
+              -1.8,
+              32.8
+            ],
+            [
+              -1.5,
+              33.8
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "33",
+        "nameFr": "Illizi",
+        "nameAr": "إليزي",
+        "nameEn": "Illizi"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.0,
+              29.0
+            ],
+            [
+              9.5,
+              28.5
+            ],
+            [
+              10.0,
+              26.0
+            ],
+            [
+              9.0,
+              24.0
+            ],
+            [
+              8.0,
+              24.5
+            ],
+            [
+              7.5,
+              27.0
+            ],
+            [
+              8.0,
+              29.0
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "34",
+        "nameFr": "Bordj Bou Arreridj",
+        "nameAr": "برج بوعريريج",
+        "nameEn": "BBA"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              4.5,
+              36.2
+            ],
+            [
+              5.5,
+              36.4
+            ],
+            [
+              6.0,
+              36.0
+            ],
+            [
+              5.8,
+              35.5
+            ],
+            [
+              4.8,
+              35.4
+            ],
+            [
+              4.2,
+              35.8
+            ],
+            [
+              4.5,
+              36.2
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "35",
+        "nameFr": "Boumerdès",
+        "nameAr": "بومرداس",
+        "nameEn": "Boumerdès"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              3.2,
+              36.8
+            ],
+            [
+              3.8,
+              37.0
+            ],
+            [
+              4.0,
+              36.6
+            ],
+            [
+              3.8,
+              36.4
+            ],
+            [
+              3.2,
+              36.4
+            ],
+            [
+              3.0,
+              36.6
+            ],
+            [
+              3.2,
+              36.8
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "36",
+        "nameFr": "El Tarf",
+        "nameAr": "الطارف",
+        "nameEn": "El Tarf"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.2,
+              36.8
+            ],
+            [
+              8.8,
+              36.9
+            ],
+            [
+              8.8,
+              36.4
+            ],
+            [
+              8.5,
+              36.0
+            ],
+            [
+              8.0,
+              36.2
+            ],
+            [
+              7.8,
+              36.6
+            ],
+            [
+              8.2,
+              36.8
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "37",
+        "nameFr": "Tindouf",
+        "nameAr": "تندوف",
+        "nameEn": "Tindouf"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -8.5,
+              30.0
+            ],
+            [
+              -4.8,
+              30.5
+            ],
+            [
+              -3.0,
+              29.5
+            ],
+            [
+              -4.0,
+              27.5
+            ],
+            [
+              -8.5,
+              27.5
+            ],
+            [
+              -8.5,
+              30.0
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "38",
+        "nameFr": "Tissemsilt",
+        "nameAr": "تيسمسيلت",
+        "nameEn": "Tissemsilt"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              1.5,
+              36.0
+            ],
+            [
+              2.2,
+              36.2
+            ],
+            [
+              2.5,
+              35.8
+            ],
+            [
+              2.2,
+              35.3
+            ],
+            [
+              1.5,
+              35.3
+            ],
+            [
+              1.2,
+              35.7
+            ],
+            [
+              1.5,
+              36.0
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "39",
+        "nameFr": "El Oued",
+        "nameAr": "الوادي",
+        "nameEn": "El Oued"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              6.5,
+              34.0
+            ],
+            [
+              8.0,
+              34.5
+            ],
+            [
+              8.5,
+              33.5
+            ],
+            [
+              8.2,
+              32.0
+            ],
+            [
+              6.5,
+              31.8
+            ],
+            [
+              5.8,
+              32.8
+            ],
+            [
+              6.5,
+              34.0
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "40",
+        "nameFr": "Khenchela",
+        "nameAr": "خنشلة",
+        "nameEn": "Khenchela"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              6.8,
+              35.5
+            ],
+            [
+              7.8,
+              35.7
+            ],
+            [
+              8.2,
+              35.2
+            ],
+            [
+              8.0,
+              34.5
+            ],
+            [
+              6.8,
+              34.3
+            ],
+            [
+              6.3,
+              34.8
+            ],
+            [
+              6.8,
+              35.5
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "41",
+        "nameFr": "Souk Ahras",
+        "nameAr": "سوق أهراس",
+        "nameEn": "Souk Ahras"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              7.8,
+              36.5
+            ],
+            [
+              8.8,
+              36.8
+            ],
+            [
+              8.8,
+              36.2
+            ],
+            [
+              8.5,
+              35.7
+            ],
+            [
+              7.5,
+              35.6
+            ],
+            [
+              7.3,
+              36.0
+            ],
+            [
+              7.8,
+              36.5
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "42",
+        "nameFr": "Tipaza",
+        "nameAr": "تيبازة",
+        "nameEn": "Tipaza"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              1.8,
+              36.7
+            ],
+            [
+              2.5,
+              36.8
+            ],
+            [
+              2.8,
+              36.4
+            ],
+            [
+              2.5,
+              36.1
+            ],
+            [
+              1.8,
+              36.2
+            ],
+            [
+              1.5,
+              36.5
+            ],
+            [
+              1.8,
+              36.7
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "43",
+        "nameFr": "Mila",
+        "nameAr": "ميلة",
+        "nameEn": "Mila"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              5.8,
+              36.5
+            ],
+            [
+              6.8,
+              36.8
+            ],
+            [
+              7.2,
+              36.4
+            ],
+            [
+              7.0,
+              35.9
+            ],
+            [
+              5.8,
+              35.8
+            ],
+            [
+              5.5,
+              36.2
+            ],
+            [
+              5.8,
+              36.5
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "44",
+        "nameFr": "Aïn Defla",
+        "nameAr": "عين الدفلى",
+        "nameEn": "Aïn Defla"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              1.5,
+              36.2
+            ],
+            [
+              2.5,
+              36.4
+            ],
+            [
+              2.8,
+              36.0
+            ],
+            [
+              2.5,
+              35.5
+            ],
+            [
+              1.5,
+              35.4
+            ],
+            [
+              1.2,
+              35.8
+            ],
+            [
+              1.5,
+              36.2
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "45",
+        "nameFr": "Naâma",
+        "nameAr": "النعامة",
+        "nameEn": "Naâma"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -2.5,
+              33.5
+            ],
+            [
+              -0.5,
+              34.2
+            ],
+            [
+              0.0,
+              33.5
+            ],
+            [
+              -0.2,
+              32.0
+            ],
+            [
+              -2.2,
+              31.8
+            ],
+            [
+              -2.8,
+              32.5
+            ],
+            [
+              -2.5,
+              33.5
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "46",
+        "nameFr": "Aïn Témouchent",
+        "nameAr": "عين تموشنت",
+        "nameEn": "Aïn Témouchent"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -1.8,
+              35.5
+            ],
+            [
+              -0.8,
+              35.7
+            ],
+            [
+              -0.5,
+              35.3
+            ],
+            [
+              -0.8,
+              34.9
+            ],
+            [
+              -1.8,
+              34.9
+            ],
+            [
+              -2.0,
+              35.2
+            ],
+            [
+              -1.8,
+              35.5
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "47",
+        "nameFr": "Ghardaïa",
+        "nameAr": "غرداية",
+        "nameEn": "Ghardaïa"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2.5,
+              33.0
+            ],
+            [
+              4.0,
+              33.5
+            ],
+            [
+              4.5,
+              32.5
+            ],
+            [
+              4.0,
+              31.0
+            ],
+            [
+              2.5,
+              30.8
+            ],
+            [
+              2.0,
+              32.0
+            ],
+            [
+              2.5,
+              33.0
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "48",
+        "nameFr": "Relizane",
+        "nameAr": "غليزان",
+        "nameEn": "Relizane"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              0.3,
+              36.0
+            ],
+            [
+              1.2,
+              36.2
+            ],
+            [
+              1.5,
+              35.8
+            ],
+            [
+              1.2,
+              35.3
+            ],
+            [
+              0.3,
+              35.2
+            ],
+            [
+              0.0,
+              35.6
+            ],
+            [
+              0.3,
+              36.0
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "49",
+        "nameFr": "Timimoun",
+        "nameAr": "تيميمون",
+        "nameEn": "Timimoun"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -1.0,
+              29.5
+            ],
+            [
+              1.5,
+              30.0
+            ],
+            [
+              2.0,
+              28.5
+            ],
+            [
+              1.0,
+              27.0
+            ],
+            [
+              -1.0,
+              27.2
+            ],
+            [
+              -1.5,
+              28.5
+            ],
+            [
+              -1.0,
+              29.5
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "50",
+        "nameFr": "Bordj Badji Mokhtar",
+        "nameAr": "برج باجي مختار",
+        "nameEn": "Bordj Badji Mokhtar"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -3.0,
+              24.5
+            ],
+            [
+              -1.0,
+              25.0
+            ],
+            [
+              0.5,
+              24.0
+            ],
+            [
+              0.5,
+              22.0
+            ],
+            [
+              -2.0,
+              21.0
+            ],
+            [
+              -3.5,
+              22.5
+            ],
+            [
+              -3.0,
+              24.5
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "51",
+        "nameFr": "Ouled Djellal",
+        "nameAr": "أولاد جلال",
+        "nameEn": "Ouled Djellal"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              4.5,
+              34.5
+            ],
+            [
+              6.0,
+              34.8
+            ],
+            [
+              6.5,
+              34.2
+            ],
+            [
+              6.2,
+              33.2
+            ],
+            [
+              4.5,
+              32.8
+            ],
+            [
+              3.8,
+              33.5
+            ],
+            [
+              4.5,
+              34.5
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "52",
+        "nameFr": "Béni Abbès",
+        "nameAr": "بني عباس",
+        "nameEn": "Béni Abbès"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -3.0,
+              30.5
+            ],
+            [
+              -1.0,
+              31.0
+            ],
+            [
+              0.0,
+              30.0
+            ],
+            [
+              -0.5,
+              28.5
+            ],
+            [
+              -2.5,
+              28.5
+            ],
+            [
+              -3.2,
+              29.5
+            ],
+            [
+              -3.0,
+              30.5
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "53",
+        "nameFr": "In Salah",
+        "nameAr": "عين صالح",
+        "nameEn": "In Salah"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              1.5,
+              28.0
+            ],
+            [
+              4.0,
+              28.5
+            ],
+            [
+              4.5,
+              26.5
+            ],
+            [
+              3.5,
+              24.5
+            ],
+            [
+              1.5,
+              24.5
+            ],
+            [
+              1.0,
+              26.0
+            ],
+            [
+              1.5,
+              28.0
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "54",
+        "nameFr": "In Guezzam",
+        "nameAr": "عين قزام",
+        "nameEn": "In Guezzam"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2.5,
+              22.0
+            ],
+            [
+              4.0,
+              22.5
+            ],
+            [
+              5.5,
+              21.0
+            ],
+            [
+              5.5,
+              19.0
+            ],
+            [
+              3.0,
+              19.0
+            ],
+            [
+              2.0,
+              20.5
+            ],
+            [
+              2.5,
+              22.0
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "55",
+        "nameFr": "Touggourt",
+        "nameAr": "تقرت",
+        "nameEn": "Touggourt"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              5.5,
+              34.0
+            ],
+            [
+              7.0,
+              34.2
+            ],
+            [
+              7.5,
+              33.5
+            ],
+            [
+              7.2,
+              32.5
+            ],
+            [
+              5.5,
+              32.2
+            ],
+            [
+              5.0,
+              33.0
+            ],
+            [
+              5.5,
+              34.0
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "56",
+        "nameFr": "Djanet",
+        "nameAr": "جانت",
+        "nameEn": "Djanet"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.5,
+              27.0
+            ],
+            [
+              10.0,
+              27.5
+            ],
+            [
+              10.5,
+              25.0
+            ],
+            [
+              9.5,
+              23.0
+            ],
+            [
+              8.0,
+              23.5
+            ],
+            [
+              8.0,
+              25.5
+            ],
+            [
+              8.5,
+              27.0
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "57",
+        "nameFr": "El M'Ghair",
+        "nameAr": "المغير",
+        "nameEn": "El M'Ghair"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              6.0,
+              34.0
+            ],
+            [
+              8.0,
+              34.2
+            ],
+            [
+              8.5,
+              33.5
+            ],
+            [
+              8.2,
+              32.5
+            ],
+            [
+              6.0,
+              32.2
+            ],
+            [
+              5.5,
+              33.0
+            ],
+            [
+              6.0,
+              34.0
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "58",
+        "nameFr": "El Ménia",
+        "nameAr": "المنيعة",
+        "nameEn": "El Ménia"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2.0,
+              30.0
+            ],
+            [
+              4.5,
+              30.5
+            ],
+            [
+              5.0,
+              29.0
+            ],
+            [
+              4.0,
+              27.5
+            ],
+            [
+              2.0,
+              27.8
+            ],
+            [
+              1.5,
+              29.0
+            ],
+            [
+              2.0,
+              30.0
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

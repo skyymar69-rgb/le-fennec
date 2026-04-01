@@ -1,0 +1,175 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── LIGHT MODE ──────────────────────────────────────── */
+:root {
+  /* Brand */
+  --dz-green:  #006233;
+  --dz-green2: #00874A;
+  --dz-red:    #D21034;
+
+  /* shadcn tokens */
+  --background:            210 20% 98%;
+  --foreground:            222 47% 11%;
+  --card:                  0 0% 100%;
+  --card-foreground:       222 47% 11%;
+  --popover:               0 0% 100%;
+  --popover-foreground:    222 47% 11%;
+  --primary:               150 100% 19%;    /* dz-green */
+  --primary-foreground:    0 0% 100%;
+  --secondary:             210 40% 96%;
+  --secondary-foreground:  222 47% 11%;
+  --muted:                 210 40% 96%;
+  --muted-foreground:      215 16% 47%;
+  --accent:                210 40% 96%;
+  --accent-foreground:     222 47% 11%;
+  --destructive:           355 78% 44%;
+  --destructive-foreground:0 0% 100%;
+  --border:                214 32% 91%;
+  --input:                 214 32% 91%;
+  --ring:                  150 100% 19%;
+  --radius:                0.625rem;
+
+  /* Custom semantic */
+  --surface:          0 0% 100%;
+  --surface-raised:   0 0% 100%;
+  --surface-overlay:  0 0% 100%;
+  --text-primary:     222 47% 11%;
+  --text-secondary:   215 16% 47%;
+  --text-muted:       215 12% 65%;
+  --brand-subtle:     150 100% 97%;
+  --brand-border:     150 60% 80%;
+  --red-subtle:       355 78% 97%;
+}
+
+/* ─── DARK MODE ───────────────────────────────────────── */
+.dark {
+  --background:            222 47% 8%;
+  --foreground:            210 40% 95%;
+  --card:                  222 40% 11%;
+  --card-foreground:       210 40% 95%;
+  --popover:               222 40% 11%;
+  --popover-foreground:    210 40% 95%;
+  --primary:               150 80% 35%;
+  --primary-foreground:    0 0% 100%;
+  --secondary:             217 33% 17%;
+  --secondary-foreground:  210 40% 95%;
+  --muted:                 217 33% 17%;
+  --muted-foreground:      215 20% 55%;
+  --accent:                217 33% 17%;
+  --accent-foreground:     210 40% 95%;
+  --destructive:           355 78% 55%;
+  --destructive-foreground:0 0% 100%;
+  --border:                217 33% 18%;
+  --input:                 217 33% 18%;
+  --ring:                  150 80% 35%;
+
+  --surface:          222 40% 11%;
+  --surface-raised:   222 40% 14%;
+  --surface-overlay:  222 40% 9%;
+  --text-primary:     210 40% 95%;
+  --text-secondary:   215 20% 65%;
+  --text-muted:       215 16% 45%;
+  --brand-subtle:     150 40% 12%;
+  --brand-border:     150 40% 22%;
+  --red-subtle:       355 40% 14%;
+
+  --dz-green:  #00a356;
+  --dz-green2: #00c468;
+  --dz-red:    #e8244a;
+}
+
+/* ─── BASE ────────────────────────────────────────────── */
+@layer base {
+  * { @apply border-border; }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  html[dir="rtl"] body { font-family: 'Cairo', sans-serif; }
+  html[lang="ar"] body  { font-family: 'Cairo', sans-serif; }
+}
+
+/* ─── UTILITIES ───────────────────────────────────────── */
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  .text-balance { text-wrap: balance; }
+
+  .brand-gradient {
+    background: linear-gradient(135deg, var(--dz-green), var(--dz-green2));
+  }
+  .brand-gradient-text {
+    background: linear-gradient(135deg, var(--dz-green), var(--dz-green2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-bg {
+    background: linear-gradient(160deg, #004d28 0%, #006233 50%, #003d1f 100%);
+  }
+  .dark .hero-bg {
+    background: linear-gradient(160deg, #001f10 0%, #003320 50%, #001508 100%);
+  }
+
+  /* card hover lift */
+  .card-hover {
+    @apply transition-all duration-200;
+  }
+  .card-hover:hover {
+    @apply shadow-[0_4px_12px_rgba(0,0,0,.1),0_12px_32px_rgba(0,0,0,.08)] -translate-y-0.5;
+  }
+
+  /* Focus ring brand */
+  .focus-brand:focus-visible {
+    outline: 2px solid var(--dz-green);
+    outline-offset: 2px;
+  }
+}
+
+/* ─── SCROLLBAR GLOBAL ────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground)); }
+
+/* ─── ALGERIA MAP WILAYA ──────────────────────────────── */
+.wilaya {
+  fill: var(--dz-green);
+  stroke: hsl(var(--background));
+  stroke-width: 0.8;
+  cursor: pointer;
+  opacity: 0.65;
+  transition: opacity 0.15s, fill 0.15s;
+}
+.wilaya:hover  { opacity: 1; fill: var(--dz-green2); }
+.wilaya.active { opacity: 1; fill: var(--dz-red); }
+.wilaya-label {
+  font-size: 5px;
+  fill: hsl(var(--foreground));
+  pointer-events: none;
+  font-family: Inter, sans-serif;
+  font-weight: 600;
+}
+
+/* ─── DARK MODE MAP ───────────────────────────────────── */
+.dark .wilaya { stroke: hsl(var(--background)); }
+
+/* ─── RTL SUPPORT ─────────────────────────────────────── */
+[dir="rtl"] .rtl-flip { transform: scaleX(-1); }
+[dir="rtl"] .rtl-mr { margin-right: 0; margin-left: 0.5rem; }
+
+/* ─── TRANSITIONS THEME ───────────────────────────────── */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color;
+  transition-duration: 150ms;
+  transition-timing-function: ease;
+}
+/* Disable transition on heavy elements */
+img, svg, canvas, video { transition: none; }

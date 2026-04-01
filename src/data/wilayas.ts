@@ -1,0 +1,148 @@
+import type { Wilaya } from '../types';
+
+// Algeria SVG map — viewBox "0 0 500 620"
+// Each wilaya has: code (01-58), names (FR/AR/EN), SVG path, label center (cx/cy), density
+export const WILAYAS: Wilaya[] = [
+  // ── NORD (côtières) ──────────────────────────────────────────────────────
+  { code:'16', nameFr:'Alger',         nameAr:'الجزائر',        nameEn:'Algiers',      density:'high',   cx:230, cy:72,
+    path:'M218,58 L252,58 L256,70 L250,82 L236,86 L220,76 Z' },
+  { code:'31', nameFr:'Oran',          nameAr:'وهران',           nameEn:'Oran',         density:'high',   cx:96,  cy:72,
+    path:'M82,58 L112,58 L114,70 L108,82 L96,84 L82,70 Z' },
+  { code:'25', nameFr:'Constantine',   nameAr:'قسنطينة',         nameEn:'Constantine',  density:'high',   cx:362, cy:88,
+    path:'M352,78 L370,78 L374,90 L366,100 L350,100 L346,88 Z' },
+  { code:'23', nameFr:'Annaba',        nameAr:'عنابة',           nameEn:'Annaba',       density:'high',   cx:402, cy:68,
+    path:'M388,58 L416,58 L418,72 L410,80 L394,80 L388,68 Z' },
+  { code:'06', nameFr:'Béjaïa',        nameAr:'بجاية',           nameEn:'Béjaia',       density:'medium', cx:314, cy:70,
+    path:'M300,58 L328,58 L330,72 L322,80 L306,80 L300,68 Z' },
+  { code:'15', nameFr:'Tizi Ouzou',    nameAr:'تيزي وزو',        nameEn:'Tizi Ouzou',   density:'medium', cx:282, cy:70,
+    path:'M270,58 L300,58 L300,68 L294,80 L278,80 L270,68 Z' },
+  { code:'35', nameFr:'Boumerdès',     nameAr:'بومرداس',         nameEn:'Boumerdès',    density:'high',   cx:254, cy:68,
+    path:'M252,58 L270,58 L270,68 L264,80 L252,78 L248,68 Z' },
+  { code:'42', nameFr:'Tipaza',        nameAr:'تيبازة',          nameEn:'Tipaza',       density:'medium', cx:192, cy:66,
+    path:'M172,58 L218,58 L218,68 L212,78 L196,80 L172,70 Z' },
+  { code:'09', nameFr:'Blida',         nameAr:'البليدة',         nameEn:'Blida',        density:'high',   cx:206, cy:80,
+    path:'M196,74 L220,74 L220,82 L214,90 L200,90 L196,82 Z' },
+  { code:'02', nameFr:'Chlef',         nameAr:'الشلف',           nameEn:'Chlef',        density:'medium', cx:150, cy:70,
+    path:'M138,58 L168,58 L168,72 L160,82 L144,82 L138,70 Z' },
+  { code:'27', nameFr:'Mostaganem',    nameAr:'مستغانم',         nameEn:'Mostaganem',   density:'medium', cx:124, cy:70,
+    path:'M112,58 L138,58 L138,68 L130,78 L116,78 L112,68 Z' },
+  { code:'46', nameFr:'Aïn Témouchent',nameAr:'عين تموشنت',      nameEn:'Aïn Témouchent',density:'medium',cx:66,  cy:68,
+    path:'M54,58 L82,58 L84,68 L76,78 L60,78 L54,68 Z' },
+  { code:'13', nameFr:'Tlemcen',       nameAr:'تلمسان',          nameEn:'Tlemcen',      density:'medium', cx:34,  cy:78,
+    path:'M18,58 L54,58 L54,68 L48,84 L36,90 L20,86 L16,72 Z' },
+  { code:'21', nameFr:'Skikda',        nameAr:'سكيكدة',          nameEn:'Skikda',       density:'medium', cx:374, cy:68,
+    path:'M358,58 L388,58 L388,68 L382,78 L368,80 L358,70 Z' },
+  { code:'18', nameFr:'Jijel',         nameAr:'جيجل',            nameEn:'Jijel',        density:'medium', cx:344, cy:68,
+    path:'M330,58 L360,58 L360,68 L352,78 L338,78 L330,68 Z' },
+  { code:'23', nameFr:'Annaba',        nameAr:'عنابة',           nameEn:'Annaba',       density:'high',   cx:402, cy:68,
+    path:'M388,58 L416,58 L418,72 L410,80 L394,80 L388,68 Z' },
+  { code:'36', nameFr:'El Tarf',       nameAr:'الطارف',          nameEn:'El Tarf',      density:'low',    cx:428, cy:70,
+    path:'M416,58 L446,58 L446,74 L436,82 L420,82 L416,70 Z' },
+
+  // ── INTÉRIEUR NORD ───────────────────────────────────────────────────────
+  { code:'22', nameFr:'Sidi Bel Abbès',nameAr:'سيدي بلعباس',    nameEn:'Sidi Bel Abbès',density:'medium',cx:58,  cy:96,
+    path:'M40,86 L78,86 L80,100 L68,110 L46,108 L38,96 Z' },
+  { code:'48', nameFr:'Relizane',      nameAr:'غليزان',          nameEn:'Relizane',     density:'medium', cx:116, cy:96,
+    path:'M98,84 L140,84 L140,98 L128,106 L100,106 L96,96 Z' },
+  { code:'44', nameFr:'Aïn Defla',     nameAr:'عين الدفلى',      nameEn:'Aïn Defla',    density:'medium', cx:166, cy:90,
+    path:'M148,82 L186,82 L188,96 L176,104 L152,104 L148,92 Z' },
+  { code:'26', nameFr:'Médéa',         nameAr:'المدية',          nameEn:'Médéa',        density:'medium', cx:202, cy:100,
+    path:'M186,90 L220,90 L220,106 L206,114 L186,112 L184,100 Z' },
+  { code:'10', nameFr:'Bouira',        nameAr:'البويرة',         nameEn:'Bouira',       density:'medium', cx:264, cy:96,
+    path:'M250,84 L282,84 L284,100 L272,110 L252,108 L248,96 Z' },
+  { code:'43', nameFr:'Mila',          nameAr:'ميلة',            nameEn:'Mila',         density:'medium', cx:328, cy:98,
+    path:'M314,84 L346,84 L348,100 L334,108 L316,106 L312,96 Z' },
+  { code:'04', nameFr:'Oum El Bouaghi',nameAr:'أم البواقي',      nameEn:'Oum El Bouaghi',density:'medium',cx:360, cy:106,
+    path:'M346,96 L374,96 L376,112 L364,120 L348,118 L344,108 Z' },
+  { code:'05', nameFr:'Batna',         nameAr:'باتنة',           nameEn:'Batna',        density:'medium', cx:334, cy:114,
+    path:'M316,104 L352,104 L354,120 L340,130 L318,128 L314,116 Z' },
+  { code:'41', nameFr:'Souk Ahras',    nameAr:'سوق أهراس',       nameEn:'Souk Ahras',   density:'medium', cx:414, cy:94,
+    path:'M400,80 L438,80 L440,98 L426,108 L402,106 L398,92 Z' },
+  { code:'24', nameFr:'Guelma',        nameAr:'قالمة',           nameEn:'Guelma',       density:'medium', cx:390, cy:100,
+    path:'M374,88 L410,88 L412,104 L398,112 L376,110 L372,100 Z' },
+  { code:'40', nameFr:'Khenchela',     nameAr:'خنشلة',           nameEn:'Khenchela',    density:'low',    cx:384, cy:118,
+    path:'M370,108 L402,108 L404,126 L388,132 L370,130 L368,120 Z' },
+  { code:'12', nameFr:'Tébessa',       nameAr:'تبسة',            nameEn:'Tébessa',      density:'low',    cx:408, cy:120,
+    path:'M394,108 L440,108 L442,132 L424,140 L396,138 L392,122 Z' },
+  { code:'34', nameFr:'Bordj Bou Arreridj',nameAr:'برج بوعريريج',nameEn:'BBA',         density:'medium', cx:306, cy:106,
+    path:'M290,98 L320,98 L322,114 L308,122 L292,120 L288,110 Z' },
+  { code:'19', nameFr:'Sétif',         nameAr:'سطيف',            nameEn:'Sétif',        density:'medium', cx:302, cy:98,
+    path:'M284,86 L324,86 L326,106 L308,114 L286,112 L282,98 Z' },
+  { code:'38', nameFr:'Tissemsilt',    nameAr:'تيسمسيلت',        nameEn:'Tissemsilt',   density:'low',    cx:128, cy:112,
+    path:'M114,102 L148,102 L150,120 L136,126 L116,124 L112,114 Z' },
+
+  // ── HAUTS PLATEAUX ───────────────────────────────────────────────────────
+  { code:'29', nameFr:'Mascara',       nameAr:'معسكر',           nameEn:'Mascara',      density:'medium', cx:50,  cy:120,
+    path:'M34,104 L72,104 L74,132 L58,140 L36,138 L32,122 Z' },
+  { code:'14', nameFr:'Tiaret',        nameAr:'تيارت',           nameEn:'Tiaret',       density:'medium', cx:92,  cy:130,
+    path:'M72,112 L112,112 L114,140 L96,148 L74,146 L70,132 Z' },
+  { code:'20', nameFr:'Saïda',         nameAr:'سعيدة',           nameEn:'Saïda',        density:'low',    cx:30,  cy:136,
+    path:'M14,116 L50,116 L52,150 L36,158 L16,154 L12,136 Z' },
+  { code:'45', nameFr:'Naâma',         nameAr:'النعامة',         nameEn:'Naâma',        density:'low',    cx:16,  cy:108,
+    path:'M4,90 L30,90 L32,120 L18,128 L6,124 L2,108 Z' },
+  { code:'17', nameFr:'Djelfa',        nameAr:'الجلفة',          nameEn:'Djelfa',       density:'medium', cx:148, cy:142,
+    path:'M118,120 L178,120 L180,162 L160,170 L120,168 L116,142 Z' },
+  { code:'28', nameFr:'M\'Sila',       nameAr:'المسيلة',         nameEn:"M'Sila",       density:'medium', cx:256, cy:124,
+    path:'M228,108 L284,108 L286,138 L264,148 L230,146 L226,124 Z' },
+  { code:'07', nameFr:'Biskra',        nameAr:'بسكرة',           nameEn:'Biskra',       density:'medium', cx:310, cy:140,
+    path:'M286,120 L334,120 L336,154 L312,164 L288,160 L284,136 Z' },
+
+  // ── SUD ──────────────────────────────────────────────────────────────────
+  { code:'32', nameFr:'El Bayadh',     nameAr:'البيض',           nameEn:'El Bayadh',    density:'low',    cx:22,  cy:168,
+    path:'M4,148 L42,148 L44,186 L24,194 L6,190 L2,166 Z' },
+  { code:'03', nameFr:'Laghouat',      nameAr:'الأغواط',         nameEn:'Laghouat',     density:'low',    cx:80,  cy:162,
+    path:'M42,148 L118,148 L120,178 L88,188 L44,186 Z' },
+  { code:'48b',nameFr:'Ouled Djellal', nameAr:'أولاد جلال',      nameEn:'Ouled Djellal',density:'low',    cx:214, cy:174,
+    path:'M178,156 L252,156 L254,192 L218,200 L180,196 Z' },
+  { code:'39', nameFr:'El Oued',       nameAr:'الوادي',          nameEn:'El Oued',      density:'low',    cx:316, cy:168,
+    path:'M280,150 L350,150 L352,186 L318,196 L282,190 Z' },
+  { code:'47', nameFr:'Ghardaïa',      nameAr:'غرداية',          nameEn:'Ghardaïa',     density:'medium', cx:156, cy:192,
+    path:'M118,174 L194,174 L196,210 L158,220 L120,214 Z' },
+  { code:'30', nameFr:'Ouargla',       nameAr:'ورقلة',           nameEn:'Ouargla',      density:'medium', cx:244, cy:210,
+    path:'M192,186 L294,186 L296,230 L246,242 L194,236 Z' },
+  { code:'33', nameFr:'Illizi',        nameAr:'إليزي',           nameEn:'Illizi',       density:'low',    cx:380, cy:218,
+    path:'M330,174 L430,174 L432,262 L382,272 L332,260 Z' },
+
+  // ── GRAND SUD ────────────────────────────────────────────────────────────
+  { code:'37', nameFr:'Tindouf',       nameAr:'تندوف',           nameEn:'Tindouf',      density:'low',    cx:16,  cy:220,
+    path:'M2,190 L34,190 L36,262 L18,270 L2,266 Z' },
+  { code:'08', nameFr:'Béchar',        nameAr:'بشار',            nameEn:'Béchar',       density:'low',    cx:36,  cy:212,
+    path:'M22,186 L72,186 L74,252 L38,262 L24,256 Z' },
+  { code:'52', nameFr:'Béni Abbès',    nameAr:'بني عباس',        nameEn:'Béni Abbès',   density:'low',    cx:58,  cy:258,
+    path:'M24,252 L96,252 L98,290 L60,300 L26,294 Z' },
+  { code:'49', nameFr:'Timimoun',      nameAr:'تيميمون',         nameEn:'Timimoun',     density:'low',    cx:96,  cy:240,
+    path:'M72,218 L122,218 L124,264 L98,272 L74,266 Z' },
+  { code:'50', nameFr:'Bordj Badji Mokhtar',nameAr:'برج باجي مختار',nameEn:'Bordj Badji Mokhtar',density:'low',cx:46,cy:300,
+    path:'M10,288 L84,288 L86,338 L48,348 L12,342 Z' },
+  { code:'01', nameFr:'Adrar',         nameAr:'أدرار',           nameEn:'Adrar',        density:'low',    cx:104, cy:286,
+    path:'M84,262 L142,262 L144,324 L106,336 L86,328 Z' },
+  { code:'53', nameFr:'In Salah',      nameAr:'عين صالح',        nameEn:'In Salah',     density:'low',    cx:162, cy:268,
+    path:'M122,244 L204,244 L206,298 L164,310 L124,300 Z' },
+  { code:'58', nameFr:'El Ménia',      nameAr:'المنيعة',         nameEn:'El Ménia',     density:'low',    cx:196, cy:244,
+    path:'M124,220 L194,220 L196,264 L158,272 L126,264 Z' },
+  { code:'51', nameFr:'Ouled Djellal', nameAr:'أولاد جلال',      nameEn:'Ouled Djellal',density:'low',    cx:212, cy:196,
+    path:'M180,178 L250,178 L252,212 L214,222 L182,216 Z' },
+  { code:'55', nameFr:'Touggourt',     nameAr:'تقرت',            nameEn:'Touggourt',    density:'low',    cx:278, cy:196,
+    path:'M248,178 L310,178 L312,216 L280,226 L250,220 Z' },
+  { code:'57', nameFr:'El M\'Ghair',   nameAr:'المغير',          nameEn:"El M'Ghair",   density:'low',    cx:296, cy:218,
+    path:'M252,202 L340,202 L342,238 L298,248 L254,242 Z' },
+  { code:'56', nameFr:'Djanet',        nameAr:'جانت',            nameEn:'Djanet',       density:'low',    cx:394, cy:278,
+    path:'M336,252 L454,252 L456,308 L396,318 L338,310 Z' },
+  { code:'54', nameFr:'In Guezzam',    nameAr:'عين قزام',        nameEn:'In Guezzam',   density:'low',    cx:218, cy:340,
+    path:'M148,308 L290,308 L292,378 L220,392 L150,382 Z' },
+  { code:'11', nameFr:'Tamanrasset',   nameAr:'تمنراست',         nameEn:'Tamanrasset',  density:'low',    cx:214, cy:426,
+    path:'M140,380 L292,380 L300,470 L220,490 L142,480 Z' },
+];
+
+// ─── Helper: get wilaya by code ───────────────────────────────────────────────
+export function getWilaya(code: string): Wilaya | undefined {
+  return WILAYAS.find(w => w.code === code);
+}
+
+export function getWilayaName(code: string, lang: 'fr' | 'ar' | 'en' = 'fr'): string {
+  const w = getWilaya(code);
+  if (!w) return '';
+  return lang === 'ar' ? w.nameAr : lang === 'en' ? w.nameEn : w.nameFr;
+}
+
+export const POPULAR_WILAYAS = ['16','31','25','23','09','19','05','06','02','42','35'];
