@@ -87,9 +87,12 @@ export const AuthPage: React.FC = () => {
     // In production: receive real user data from OAuth callback
     // For now: create a new empty profile (no fake name)
     const mockEmail = `user_${Date.now().toString(36)}@${providerId}.oauth`;
+    // In production: name/email come from OAuth provider's profile
+    // For demo: generate a placeholder that user can change in Settings
+    const providerName = { google: 'Utilisateur Google', facebook: 'Utilisateur Facebook' }[providerId] || 'Nouvel utilisateur';
     const profile: UserProfile = {
       id:            `oauth_${Date.now()}`,
-      name:          '',   // Will be filled from OAuth profile in production
+      name:          providerName,
       email:         mockEmail,
       phone:         '',
       avatar:        `https://api.dicebear.com/7.x/initials/svg?seed=${mockEmail}&backgroundColor=006233&textColor=ffffff`,

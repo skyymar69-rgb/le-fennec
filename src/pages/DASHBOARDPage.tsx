@@ -12,14 +12,15 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useApp } from '../contexts/AppContext';
 import logoUrl from '../assets/logo.png';
 
+// Week data: zeros for new users — populated from real analytics in production
 const WEEK = [
-  { j:'Lun', vues:142, contacts:8 },
-  { j:'Mar', vues:98,  contacts:5 },
-  { j:'Mer', vues:187, contacts:12},
-  { j:'Jeu', vues:134, contacts:7 },
-  { j:'Ven', vues:221, contacts:18},
-  { j:'Sam', vues:310, contacts:24},
-  { j:'Dim', vues:268, contacts:19},
+  { j:'Lun', vues:0, contacts:0 },
+  { j:'Mar', vues:0, contacts:0 },
+  { j:'Mer', vues:0, contacts:0 },
+  { j:'Jeu', vues:0, contacts:0 },
+  { j:'Ven', vues:0, contacts:0 },
+  { j:'Sam', vues:0, contacts:0 },
+  { j:'Dim', vues:0, contacts:0 },
 ];
 
 export const DashboardPage: React.FC = () => {
@@ -59,6 +60,20 @@ export const DashboardPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-muted/30 pb-24 md:pb-12">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-5">
+
+        {/* ── Profile completion banner (shown when name is placeholder) ── */}
+        {user && (user.name === '' || user.name === 'Utilisateur Google' || user.name === 'Utilisateur Facebook' || user.name === 'Nouvel utilisateur') && (
+          <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 rounded-2xl px-4 py-3 flex items-center gap-3">
+            <span className="text-lg">✏️</span>
+            <div className="flex-1">
+              <p className="text-sm font-bold text-amber-800 dark:text-amber-300">Complétez votre profil</p>
+              <p className="text-xs text-amber-700 dark:text-amber-400">Allez dans Paramètres pour ajouter votre vrai nom et augmenter votre score de confiance.</p>
+            </div>
+            <button onClick={() => setTab('settings')} className="text-xs font-bold text-white bg-amber-500 px-3 py-1.5 rounded-lg hover:bg-amber-600 transition-colors shrink-0">
+              Compléter →
+            </button>
+          </div>
+        )}
 
         {/* ── Top profile bar ── */}
         <div className="bg-card border border-border rounded-2xl p-5 flex items-center gap-4 shadow-card">
@@ -152,7 +167,7 @@ export const DashboardPage: React.FC = () => {
                 <div className="flex justify-between items-center mb-4">
                   <div>
                     <h3 className="font-black text-foreground text-sm">Vues & contacts — 7 derniers jours</h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">1 360 vues · 93 contacts cette semaine</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Vos statistiques apparaîtront ici après vos premières annonces</p>
                   </div>
                   <TrendingUp size={16} className="text-dz-green" />
                 </div>
