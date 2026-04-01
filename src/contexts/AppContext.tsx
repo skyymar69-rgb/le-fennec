@@ -31,8 +31,8 @@ function hydrate<T>(key: string, fallback: T): T {
 const NOW = Date.now();
 const DAY = 86_400_000;
 
-// Legacy - see src/data/listings.ts
-export const DEMO_LISTINGS: Listing[] = [
+// Catalog: see src/data/listings.ts
+ [
   {
     id:'1', title:'Appartement F4 Haut Standing — Hydra, Alger',
     slug:'appartement-f4-hydra-1', price:45_000_000, currency:'DZD', negotiable:false,
