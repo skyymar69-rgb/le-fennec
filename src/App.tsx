@@ -11,6 +11,7 @@ import SearchPage            from './pages/SearchPage';
 import ListingDetailPage     from './pages/ListingDetailPage';
 import PostAdPage            from './pages/PostAdPage';
 import LegalPage             from './pages/LegalPage';
+import ModerationPage        from './pages/ModerationPage';
 import logoUrl               from './assets/logo.png';
 
 const AuthPage      = React.lazy(() => import('./pages/AuthPage').then(m => ({ default: m.AuthPage      ?? m.default })));
@@ -28,22 +29,30 @@ const Spinner = () => (
 
 const NotFound = () => (
   <div className="min-h-[60vh] bg-background flex flex-col items-center justify-center gap-5 text-center p-8">
-    <img src={logoUrl} alt="Le Fennec DZ Market" className="w-28 h-28 object-contain opacity-60" />
+    <img src={logoUrl} alt="Le Fennec DZ Market" className="w-28 h-28 object-contain opacity-50" />
     <div>
       <h1 className="text-5xl font-black text-foreground mb-2">404</h1>
       <h2 className="text-xl font-bold text-foreground mb-2">Page introuvable</h2>
-      <p className="text-muted-foreground mb-6 max-w-sm">
+      <p className="text-muted-foreground mb-6 max-w-sm leading-relaxed">
         La page que vous recherchez n'existe pas ou a été déplacée.
       </p>
     </div>
     <div className="flex flex-col sm:flex-row gap-3">
-      <Link to="/" className="px-6 py-3 bg-dz-green text-white font-bold rounded-xl shadow-brand-sm hover:bg-dz-green2 transition-colors">
-        Retour à l'accueil
-      </Link>
-      <Link to="/search" className="px-6 py-3 border border-border text-foreground font-bold rounded-xl hover:bg-muted transition-colors">
-        Voir les annonces
-      </Link>
+      <Link to="/"       className="px-6 py-3 bg-dz-green text-white font-bold rounded-xl shadow-brand-sm hover:bg-dz-green2 transition-colors">Retour à l'accueil</Link>
+      <Link to="/search" className="px-6 py-3 border border-border text-foreground font-bold rounded-xl hover:bg-muted transition-colors">Voir les annonces</Link>
     </div>
+  </div>
+);
+
+// Composant qui masque Header/Footer sur certaines pages
+const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div className="min-h-screen flex flex-col bg-background text-foreground">
+    <Header />
+    <main id="main-content" className="flex-1">
+      {children}
+    </main>
+    <Footer />
+    <BottomNav />
   </div>
 );
 
@@ -53,31 +62,33 @@ const App: React.FC = () => (
       <LanguageProvider>
         <AppProvider>
           <BrowserRouter>
-            <div className="min-h-screen flex flex-col bg-background text-foreground">
-              <Header />
-              <main id="main-content" className="flex-1">
-                <React.Suspense fallback={<Spinner />}>
-                  <Routes>
-                    <Route path="/"                   element={<HomePage />}          />
-                    <Route path="/search"             element={<SearchPage />}        />
-                    <Route path="/listing/:id"        element={<ListingDetailPage />} />
-                    <Route path="/post"               element={<PostAdPage />}        />
-                    <Route path="/auth"               element={<AuthPage />}          />
-                    <Route path="/dashboard"          element={<DashboardPage />}     />
-                    <Route path="/messages"           element={<MessagesPage />}      />
-                    <Route path="/favorites"          element={<FavoritesPage />}     />
-                    <Route path="/legal/:slug"        element={<LegalPage />}         />
-                    {/* Alias shortcuts */}
-                    <Route path="/mentions-legales"   element={<LegalPage />}         />
-                    <Route path="/cgu"                element={<LegalPage />}         />
-                    <Route path="/confidentialite"    element={<LegalPage />}         />
-                    <Route path="*"                   element={<NotFound />}          />
-                  </Routes>
-                </React.Suspense>
-              </main>
-              <Footer />
-              <BottomNav />
-            </div>
+            <AppLayout>
+              <React.Suspense fallback={<Spinner />}>
+                <Routes>
+                  {/* Pages publiques */}
+                  <Route path="/"                   element={<HomePage />}          />
+                  <Route path="/search"             element={<SearchPage />}        />
+                  <Route path="/listing/:id"        element={<ListingDetailPage />} />
+                  <Route path="/post"               element={<PostAdPage />}        />
+                  <Route path="/auth"               element={<AuthPage />}          />
+
+                  {/* Pages utilisateur authentifié */}
+                  <Route path="/dashboard"          element={<DashboardPage />}     />
+                  <Route path="/messages"           element={<MessagesPage />}      />
+                  <Route path="/favorites"          element={<FavoritesPage />}     />
+
+                  {/* Légal */}
+                  <Route path="/legal/:slug"        element={<LegalPage />}         />
+                  <Route path="/legal"              element={<LegalPage />}         />
+
+                  {/* 🛡️ Backoffice modération (protéger par rôle admin en prod) */}
+                  <Route path="/moderation"         element={<ModerationPage />}    />
+
+                  {/* 404 */}
+                  <Route path="*"                   element={<NotFound />}          />
+                </Routes>
+              </React.Suspense>
+            </AppLayout>
           </BrowserRouter>
         </AppProvider>
       </LanguageProvider>
