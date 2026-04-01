@@ -24,12 +24,13 @@ function hydrate<T>(key: string, fallback: T): T {
 
 // ─── Initial user ──────────────────────────────────────────────
 
+// No default user - authentication required
 export const INITIAL_USER: UserProfile = {
-  id: 'u1', name: 'Karim H.', email: 'karim@gmail.com',
-  phone: '0550 12 34 56',
-  avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=KH&backgroundColor=006233&textColor=ffffff',
-  memberSince: '2025', isEmailVerified: true, isPhoneVerified: false,
-  isIdentityVerified: false, trustScore: 20, badges: [],
+  id: '', name: '', email: '', phone: '',
+  avatar: '',
+  memberSince: new Date().getFullYear().toString(),
+  isEmailVerified: false, isPhoneVerified: false,
+  isIdentityVerified: false, trustScore: 0, badges: [],
 };
 
 // ─── Mock listings (demo data, starts empty in production) ────
