@@ -357,3 +357,23 @@ export interface Translation {
   wilayasCovered:string;
   totalFree:     string;
 }
+
+// Updated CategoryFilter
+  id:         string;
+  type:       'select' | 'number' | 'text' | 'multi';
+  labelFr:    string;
+  labelAr:    string;
+  labelEn:    string;
+  required?:  boolean;
+  showFor?:   string[];   // Show only when property_type matches one of these values
+  options?:   { labelFr:string; labelAr:string; labelEn:string; value: string|number }[];
+  min?:       number;
+  max?:       number;
+  step?:      number;
+  placeholder?: string;
+}
+
+export interface CategoryPlaceholders {
+  title:       { fr:string; ar:string; en:string };
+  description: { fr:string; ar:string; en:string };
+}

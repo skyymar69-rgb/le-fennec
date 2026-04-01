@@ -24,14 +24,7 @@ function hydrate<T>(key: string, fallback: T): T {
 
 // ─── Initial user ──────────────────────────────────────────────
 
-// No default user - authentication required
-export const INITIAL_USER: UserProfile = {
-  id: '', name: '', email: '', phone: '',
-  avatar: '',
-  memberSince: new Date().getFullYear().toString(),
-  isEmailVerified: false, isPhoneVerified: false,
-  isIdentityVerified: false, trustScore: 0, badges: [],
-};
+// Auth is handled by AuthPage — no default user
 
 // ─── Mock listings (demo data, starts empty in production) ────
 

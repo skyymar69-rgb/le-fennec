@@ -366,7 +366,7 @@ const PostAdPage: React.FC = () => {
               <input type="text" value={form.title} maxLength={80}
                 onChange={e => { set({ title: e.target.value }); setModListing(null); }}
                 onBlur={() => form.title.length > 5 && handleModerateText()}
-                placeholder={t.titlePlaceholder}
+                placeholder={activeCategory?.placeholders?.title?.[language as 'fr'|'ar'|'en'] || t.titlePlaceholder}
                 className="w-full bg-muted border border-border rounded-xl px-4 py-3 text-sm outline-none focus:border-dz-green transition-all" />
             </div>
 
@@ -382,8 +382,13 @@ const PostAdPage: React.FC = () => {
                   </button>
                 </div>
                 <input type="number" value={form.price} onChange={e => set({ price: e.target.value })}
-                  placeholder="0"
+                  placeholder="0 = Don gratuit"
                   className="w-full bg-muted border border-border rounded-xl px-4 py-3 text-sm outline-none focus:border-dz-green transition-all"/>
+                {form.price && parseInt(form.price) === 1 && (
+                  <p className="text-xs text-amber-600 mt-1">
+                    ⚠️ Prix de 1 DA suspect. Mettez le vrai prix ou 0 pour un don gratuit.
+                  </p>
+                )}
                 {aiPrice && (
                   <div className="mt-2 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/40 rounded-xl p-2.5 text-xs">
                     <p className="font-bold text-blue-700 dark:text-blue-300 mb-1">
@@ -396,7 +401,9 @@ const PostAdPage: React.FC = () => {
                 )}
                 <label className="flex items-center gap-2 mt-2 cursor-pointer">
                   <input type="checkbox" checked={form.negotiable} onChange={e => set({ negotiable: e.target.checked })} className="rounded accent-dz-green"/>
-                  <span className="text-xs text-muted-foreground">{t.isNegotiable}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {form.price === '0' ? '🎁 Don gratuit' : t.isNegotiable}
+                  </span>
                 </label>
               </div>
               <div>
@@ -410,20 +417,30 @@ const PostAdPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Dynamic attributes */}
+            {/* Dynamic attributes — type-aware (showFor logic) */}
             {activeCategory?.filters?.length ? (
               <div className="pt-2 border-t border-border">
-                <p className="text-xs font-bold text-foreground mb-3">🔖 Détails {catName(activeCategory)}</p>
+                <p className="text-xs font-bold text-foreground mb-3">
+                  🔖 {language === 'ar' ? 'تفاصيل' : 'Détails'} {catName(activeCategory)}
+                </p>
                 <div className="grid grid-cols-2 gap-3">
-                  {activeCategory.filters.map(f => (
-                    <div key={f.id}>
-                      <label className="text-xs font-bold text-muted-foreground uppercase block mb-1">
+                  {activeCategory.filters
+                    .filter(f => {
+                      // If filter has showFor, only show when current property_type matches
+                      if (!f.showFor || f.showFor.length === 0) return true;
+                      const currentType = form.attributes['property_type'] || '';
+                      return f.showFor.includes(currentType);
+                    })
+                    .map(f => (
+                    <div key={f.id} className={f.type === 'multi' ? 'col-span-2' : ''}>
+                      <label className={`text-xs font-bold uppercase block mb-1 ${f.required ? 'text-foreground' : 'text-muted-foreground'}`}>
                         {language === 'ar' ? f.labelAr : language === 'en' ? f.labelEn : f.labelFr}
+                        {f.required && <span className="text-dz-red ml-0.5">*</span>}
                       </label>
                       {f.type === 'select' ? (
                         <select value={form.attributes[f.id] || ''}
                           onChange={e => set({ attributes: { ...form.attributes, [f.id]: e.target.value } })}
-                          className="w-full bg-muted border border-border rounded-xl px-3 py-2 text-sm outline-none cursor-pointer">
+                          className="w-full bg-muted border border-border rounded-xl px-3 py-2 text-sm outline-none focus:border-dz-green cursor-pointer">
                           <option value="">—</option>
                           {f.options?.map(opt => (
                             <option key={String(opt.value)} value={String(opt.value)}>
@@ -431,11 +448,37 @@ const PostAdPage: React.FC = () => {
                             </option>
                           ))}
                         </select>
-                      ) : (
-                        <input type="number" placeholder={f.placeholder}
+                      ) : f.type === 'multi' ? (
+                        <div className="flex flex-wrap gap-2">
+                          {f.options?.map(opt => {
+                            const vals = (form.attributes[f.id] || '').split(',').filter(Boolean);
+                            const checked = vals.includes(String(opt.value));
+                            return (
+                              <button key={String(opt.value)} type="button"
+                                onClick={() => {
+                                  const cur = (form.attributes[f.id] || '').split(',').filter(Boolean);
+                                  const next = checked ? cur.filter(v => v !== String(opt.value)) : [...cur, String(opt.value)];
+                                  set({ attributes: { ...form.attributes, [f.id]: next.join(',') }});
+                                }}
+                                className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-all ${
+                                  checked ? 'bg-dz-green text-white border-dz-green' : 'bg-muted border-border text-muted-foreground hover:border-dz-green/40'
+                                }`}>
+                                {language === 'ar' ? opt.labelAr : language === 'en' ? opt.labelEn : opt.labelFr}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      ) : f.type === 'text' ? (
+                        <input type="text" placeholder={f.placeholder || ''}
                           value={form.attributes[f.id] || ''}
                           onChange={e => set({ attributes: { ...form.attributes, [f.id]: e.target.value } })}
-                          className="w-full bg-muted border border-border rounded-xl px-3 py-2 text-sm outline-none"/>
+                          className="w-full bg-muted border border-border rounded-xl px-3 py-2 text-sm outline-none focus:border-dz-green"/>
+                      ) : (
+                        <input type="number" placeholder={f.placeholder || ''}
+                          min={f.min} max={f.max} step={f.step}
+                          value={form.attributes[f.id] || ''}
+                          onChange={e => set({ attributes: { ...form.attributes, [f.id]: e.target.value } })}
+                          className="w-full bg-muted border border-border rounded-xl px-3 py-2 text-sm outline-none focus:border-dz-green"/>
                       )}
                     </div>
                   ))}
@@ -456,7 +499,7 @@ const PostAdPage: React.FC = () => {
               <textarea rows={5} value={form.description}
                 onChange={e => { set({ description: e.target.value }); setModListing(null); }}
                 onBlur={() => form.title && form.description.length > 20 && handleModerateText()}
-                placeholder={t.descPlaceholder}
+                placeholder={activeCategory?.placeholders?.description?.[language as 'fr'|'ar'|'en'] || t.descPlaceholder}
                 className="w-full bg-muted border border-border rounded-xl px-4 py-3 text-sm outline-none focus:border-dz-green resize-none transition-all"/>
             </div>
 

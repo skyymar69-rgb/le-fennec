@@ -6,10 +6,10 @@ const DAY = 86_400_000;
 // ─── Unsplash images by category (real, reliable) ─────────────
 const IMG = {
   immo:  [
-    'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80',
+    'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80',
     'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80',
-    'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80',
-    'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&q=80',
+    'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?w=800&q=80',
+    'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80',
     'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80',
     'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?w=800&q=80',
     'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80',
