@@ -1,3 +1,4 @@
+import logoUrl from "../../assets/logo.png";
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
@@ -54,7 +55,7 @@ const Header: React.FC = () => {
             <Link to="/" className="shrink-0">
               <div className="flex items-center gap-2.5 group">
                 <img
-                  src="/assets/logo.png"
+                  src={logoUrl}
                   alt="Le Fennec"
                   className="w-9 h-9 object-contain group-hover:scale-105 transition-transform"
                 />
@@ -248,7 +249,7 @@ const Header: React.FC = () => {
           <aside className="w-72 bg-card h-full flex flex-col shadow-2xl animate-slide-in">
             <div className="flex items-center justify-between p-5 border-b border-border">
               <div className="flex items-center gap-2">
-                <img src="/assets/logo.png" alt="Le Fennec" className="w-8 h-8 object-contain" />
+                <img src={logoUrl} alt="Le Fennec" className="w-8 h-8 object-contain" />
                 <Logo size="sm" />
               </div>
               <button onClick={() => setMobileOpen(false)} className="p-1.5 hover:bg-muted rounded-lg">

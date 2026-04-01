@@ -11,7 +11,7 @@ import {
 import { useLanguage } from '../contexts/LanguageContext';
 import { useApp } from '../contexts/AppContext';
 import ListingCard from '../components/listing/ListingCard';
-import { MOCK_LISTINGS } from '../contexts/AppContext';
+
 
 const ListingDetailPage: React.FC = () => {
   const { id }                    = useParams<{ id: string }>();
@@ -29,7 +29,7 @@ const ListingDetailPage: React.FC = () => {
 
   const isFav    = favorites.includes(listing.id);
   const images   = listing.images?.length ? listing.images : [listing.imageUrl];
-  const similar  = listings.filter(l => l.catId === listing.categoryId && l.id !== listing.id && l.status === 'active').slice(0, 4);
+  const similar  = listings.filter(l => l.categoryId === listing.categoryId && l.id !== listing.id && l.status === 'active').slice(0, 4);
   const catId    = listing.categoryId;
 
   const prev = () => setImgIdx(i => (i - 1 + images.length) % images.length);
@@ -203,7 +203,7 @@ const ListingDetailPage: React.FC = () => {
               {/* Seller info */}
               <div className="flex items-center gap-3 pb-4 mb-4 border-b border-border">
                 <div className="relative">
-                  <img src="https://picsum.photos/60/60?random=50" alt="Vendeur"
+                  <img src="https://api.dicebear.com/7.x/initials/svg?seed=Vendeur&backgroundColor=006233&textColor=ffffff" alt="Vendeur"
                     className="w-12 h-12 rounded-2xl object-cover" />
                   {listing.isVerified && (
                     <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-dz-green rounded-full flex items-center justify-center border-2 border-card">

@@ -12,52 +12,53 @@ interface AlgeriaMapProps {
 }
 
 const AlgeriaMap: React.FC<AlgeriaMapProps> = ({
-  onSelectWilaya, selectedWilaya, className = '', compact = false, showLegend = false,
+  onSelectWilaya, selectedWilaya, className = '', compact = false,
 }) => {
   const [hovered, setHovered] = useState<string | null>(null);
-  const navigate  = useNavigate();
+  const navigate   = useNavigate();
   const { language } = useLanguage();
 
-  const getName = useCallback((code: string) => {
+  const getName = (code: string) => {
     const w = WILAYA_PATHS[code];
     if (!w) return code;
     return language === 'ar' ? w.nameAr : language === 'en' ? w.nameEn : w.nameFr;
-  }, [language]);
+  };
 
   const handleClick = useCallback((code: string) => {
-    const name = getName(code);
-    if (onSelectWilaya) onSelectWilaya(code, name);
+    if (onSelectWilaya) onSelectWilaya(code, getName(code));
     else navigate(`/search?wilaya=${code}`);
-  }, [getName, navigate, onSelectWilaya]);
+  }, [language, navigate, onSelectWilaya]);
+
+  // Group wilayas by density for color coding
+  const highDensity = ['16','31','25','09','23','15','35','06','19','05','42'];
 
   return (
     <div className={`relative select-none ${className}`}>
       <svg
         viewBox="0 0 480 560"
         className="w-full h-full"
-        style={{ filter: 'drop-shadow(0 6px 20px rgba(0,0,0,0.15))' }}
+        style={{ filter: 'drop-shadow(0 4px 20px rgba(0,0,0,0.12))' }}
       >
-        <defs>
-          <filter id="wglow">
-            <feGaussianBlur stdDeviation="2.5" result="blur"/>
-            <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-          </filter>
-          <filter id="wselected">
-            <feGaussianBlur stdDeviation="1.5" result="blur"/>
-            <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-          </filter>
-        </defs>
-
-        {/* Sea hint */}
-        <text x="240" y="16" textAnchor="middle" fontSize="7" fontFamily="Inter,sans-serif"
-          fontWeight="500" fill="currentColor" opacity="0.25">
+        {/* Sea */}
+        <rect x="0" y="0" width="480" height="28" rx="4"
+          fill="hsl(200 60% 60% / 0.15)" />
+        <text x="240" y="18" textAnchor="middle" fontSize="7"
+          fontFamily="Inter,sans-serif" fontWeight="600" letterSpacing="2"
+          fill="hsl(200 50% 55%)" opacity="0.7">
           {language === 'ar' ? 'البحر الأبيض المتوسط' : 'MÉDITERRANÉE'}
         </text>
 
+        {/* Wilaya paths */}
         {Object.entries(WILAYA_PATHS).map(([code, data]) => {
           if (!data.path) return null;
-          const isHovered  = hovered  === code;
+          const isHovered  = hovered === code;
           const isSelected = selectedWilaya === code;
+          const isDense    = highDensity.includes(code);
+
+          let fill = isDense ? 'var(--dz-green)' : 'hsl(var(--primary) / 0.55)';
+          let opacity = isDense ? 0.75 : 0.5;
+          if (isHovered)  { fill = 'var(--dz-green2)'; opacity = 1; }
+          if (isSelected) { fill = 'var(--dz-red)';    opacity = 1; }
 
           return (
             <g key={code}
@@ -66,36 +67,29 @@ const AlgeriaMap: React.FC<AlgeriaMapProps> = ({
               onMouseLeave={() => setHovered(null)}
               style={{ cursor: 'pointer' }}
             >
-              {/* Shadow layer on hover */}
+              {/* Hover shadow */}
               {(isHovered || isSelected) && (
-                <path d={data.path} fill="rgba(0,0,0,0.18)" transform="translate(2,3)" />
+                <path d={data.path} fill="rgba(0,0,0,0.2)" transform="translate(1.5,2.5)" />
               )}
-
-              {/* Main shape */}
-              <path
-                d={data.path}
+              <path d={data.path}
+                fill={fill}
+                stroke="hsl(var(--background))"
+                strokeWidth={isSelected ? 1.5 : isHovered ? 1.2 : 0.6}
+                opacity={opacity}
                 style={{
-                  fill:        isSelected ? 'var(--dz-red)' : isHovered ? 'var(--dz-green2)' : 'var(--dz-green)',
-                  stroke:      'hsl(var(--background))',
-                  strokeWidth: isSelected ? 1.5 : isHovered ? 1.2 : 0.7,
-                  opacity:     isSelected ? 1 : isHovered ? 1 : 0.72,
-                  filter:      isSelected ? 'url(#wselected)' : isHovered ? 'url(#wglow)' : undefined,
-                  transform:   isHovered || isSelected ? 'translateY(-1.5px)' : undefined,
-                  transition:  'all 0.18s ease',
+                  transform:  isHovered || isSelected ? 'translateY(-1px)' : undefined,
+                  transition: 'all 0.15s ease',
                 }}
               />
-
-              {/* Wilaya code label (skip compact) */}
-              {!compact && data.cx > 0 && (
-                <text
-                  x={data.cx} y={data.cy}
+              {/* Code label - only for dense/important wilayas or hovered */}
+              {(!compact && (isDense || isHovered || isSelected)) && data.cx > 0 && (
+                <text x={data.cx} y={data.cy}
                   textAnchor="middle" dominantBaseline="middle"
-                  fontSize={isHovered || isSelected ? 7 : 5.5}
+                  fontSize={isHovered || isSelected ? 7.5 : 6}
                   fontWeight={isHovered || isSelected ? 700 : 600}
                   fontFamily="Inter,sans-serif"
-                  fill={isSelected ? '#fff' : isHovered ? '#fff' : 'rgba(255,255,255,0.8)'}
-                  style={{ pointerEvents: 'none', transition: 'all 0.15s' }}
-                >
+                  fill="rgba(255,255,255,0.95)"
+                  style={{ pointerEvents: 'none', transition: 'all 0.15s' }}>
                   {code}
                 </text>
               )}
@@ -106,27 +100,10 @@ const AlgeriaMap: React.FC<AlgeriaMapProps> = ({
 
       {/* Tooltip */}
       {hovered && (
-        <div
-          className="absolute bottom-2 left-1/2 -translate-x-1/2 pointer-events-none z-20 animate-fade-up"
-          style={{ whiteSpace: 'nowrap' }}
-        >
-          <div className="bg-card/95 backdrop-blur-sm border border-border text-foreground px-3 py-1.5 rounded-full text-xs font-bold shadow-lg">
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 pointer-events-none z-10">
+          <div className="bg-card/95 backdrop-blur border border-border px-3 py-1.5 rounded-full text-xs font-bold shadow-lg whitespace-nowrap">
             📍 {getName(hovered)}
           </div>
-        </div>
-      )}
-
-      {/* Legend */}
-      {showLegend && (
-        <div className="mt-3 flex items-center justify-center gap-4 text-[10px] text-muted-foreground">
-          <span className="flex items-center gap-1">
-            <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: 'var(--dz-green)' }} />
-            {language === 'ar' ? 'الولاية' : language === 'en' ? 'Wilaya' : 'Wilaya'}
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: 'var(--dz-red)' }} />
-            {language === 'ar' ? 'محدد' : language === 'en' ? 'Selected' : 'Sélectionné'}
-          </span>
         </div>
       )}
     </div>

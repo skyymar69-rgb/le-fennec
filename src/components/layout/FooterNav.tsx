@@ -1,3 +1,4 @@
+import logoUrl from "../../assets/logo.png";
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Home, Search, Plus, Heart, User } from 'lucide-react';
@@ -29,7 +30,7 @@ export const Footer: React.FC = () => {
           {/* Brand */}
           <div className="col-span-2">
             <Link to="/" className="flex items-center gap-2.5 mb-4 group">
-              <img src="/assets/logo.png" alt="Le Fennec" className="w-10 h-10 object-contain group-hover:scale-105 transition-transform" />
+              <img src={logoUrl} alt="Le Fennec" className="w-10 h-10 object-contain group-hover:scale-105 transition-transform" />
               <Logo size="md" showTagline />
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mb-5">

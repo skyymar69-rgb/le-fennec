@@ -1,3 +1,4 @@
+import logoUrl from "../assets/logo.png";
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
@@ -27,7 +28,7 @@ export const DashboardPage: React.FC = () => {
 
   if (!user) return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 text-center p-6">
-      <img src="/assets/logo.png" alt="" className="w-16 h-16 object-contain opacity-60" />
+      <img src={logoUrl} alt="" className="w-16 h-16 object-contain opacity-60" />
       <h2 className="text-xl font-black text-foreground">
         {language === 'ar' ? 'سجّل دخولك للوصول إلى مساحتك' : language === 'en' ? 'Sign in to access your space' : 'Connectez-vous pour accéder à votre espace'}
       </h2>

@@ -1,3 +1,4 @@
+import logoUrl from "../assets/logo.png";
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { X, ArrowRight, Eye, EyeOff, Loader2, ShieldCheck } from 'lucide-react';
@@ -66,7 +67,7 @@ export const AuthPage: React.FC = () => {
       {/* Top bar */}
       <div className="w-full max-w-md flex justify-between items-center mb-8 relative z-10">
         <Link to="/" className="flex items-center gap-2 group">
-          <img src="/assets/logo.png" alt="Le Fennec" className="w-7 h-7 object-contain group-hover:scale-105 transition-transform" />
+          <img src={logoUrl} alt="Le Fennec" className="w-7 h-7 object-contain group-hover:scale-105 transition-transform" />
           <Logo size="sm" />
         </Link>
         <div className="flex items-center gap-2">
@@ -83,7 +84,7 @@ export const AuthPage: React.FC = () => {
         {/* Logo & title */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 rounded-2xl bg-card border border-border flex items-center justify-center mx-auto mb-4 overflow-hidden shadow-card">
-            <img src="/assets/logo.png" alt="Le Fennec" className="w-12 h-12 object-contain" />
+            <img src={logoUrl} alt="Le Fennec" className="w-12 h-12 object-contain" />
           </div>
           <h1 className="text-2xl font-black text-foreground mb-1.5">
             {mode === 'login' ? t.loginTitle : t.registerTitle}
