@@ -28,7 +28,7 @@ export const ar: Translation = {
   step:'خطوة', chooseCategory:'اختر الفئة',
   adDetails:'تفاصيل الإعلان', photos:'الصور',
   locationStep:'الموقع', contactStep:'التواصل', review:'المراجعة',
-  title:'العنوان', titlePlaceholder:'مثال: آيفون 15 برو ماكس 256 جيجا',
+  title:'العنوان', titlePlaceholder:'مثال: عنوان إعلانك…',
   adPrice:'السعر (دج)', isNegotiable:'السعر قابل للتفاوض',
   adDescription:'الوصف', descPlaceholder:'صف مقالتك بالتفصيل...',
   uploadPhotos:'أضف صورًا', photoTip:'3 صور على الأقل = بيع أسرع مرتين',

@@ -28,7 +28,7 @@ export const fr: Translation = {
   step:'Étape', chooseCategory:'Choisissez une catégorie',
   adDetails:'Détails de l\'annonce', photos:'Photos',
   locationStep:'Localisation', contactStep:'Contact', review:'Récapitulatif',
-  title:'Titre', titlePlaceholder:'Ex: iPhone 15 Pro Max 256Go',
+  title:'Titre', titlePlaceholder:'Ex: Titre de votre annonce…',
   adPrice:'Prix (DA)', isNegotiable:'Prix négociable',
   adDescription:'Description', descPlaceholder:'Décrivez votre article en détail…',
   uploadPhotos:'Ajouter des photos', photoTip:'3 photos minimum = vente 2× plus rapide',

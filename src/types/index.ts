@@ -52,16 +52,44 @@ export interface Listing {
   whatsapp?:   boolean;
 }
 
+export interface CategoryFilterOption {
+  labelFr: string;
+  labelAr: string;
+  labelEn: string;
+  value:   string | number;
+}
+
+export interface CategoryFilter {
+  id:          string;
+  type:        'select' | 'number' | 'text' | 'multi';
+  labelFr:     string;
+  labelAr:     string;
+  labelEn:     string;
+  required?:   boolean;
+  showFor?:    string[];
+  options?:    CategoryFilterOption[];
+  min?:        number;
+  max?:        number;
+  step?:       number;
+  placeholder?: string;
+}
+
+export interface CategoryPlaceholders {
+  title:       { fr: string; ar: string; en: string };
+  description: { fr: string; ar: string; en: string };
+}
+
 export interface Category {
-  id:      string;
-  nameFr:  string;
-  nameAr:  string;
-  nameEn:  string;
-  icon:    string;
-  color:   string;
-  count?:  number;
-  filters?: FilterDefinition[];
+  id:            string;
+  nameFr:        string;
+  nameAr:        string;
+  nameEn:        string;
+  icon:          string;
+  color:         string;
+  count?:        number;
+  filters?:      CategoryFilter[];
   subCategories?: SubCategory[];
+  placeholders?: CategoryPlaceholders;
 }
 
 export interface SubCategory {
