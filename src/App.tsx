@@ -1,11 +1,9 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
 import { ThemeProvider }    from './contexts/ThemeContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { AppProvider }      from './contexts/AppContext';
-
 import Header                from './components/layout/Header';
 import { Footer, BottomNav } from './components/layout/FooterNav';
 import HomePage              from './pages/HomePage';
@@ -13,30 +11,39 @@ import SearchPage            from './pages/SearchPage';
 import ListingDetailPage     from './pages/ListingDetailPage';
 import PostAdPage            from './pages/PostAdPage';
 import LegalPage             from './pages/LegalPage';
+import logoUrl               from './assets/logo.png';
 
 const AuthPage      = React.lazy(() => import('./pages/AuthPage').then(m => ({ default: m.AuthPage      ?? m.default })));
 const DashboardPage = React.lazy(() => import('./pages/DASHBOARDPage').then(m => ({ default: m.DashboardPage ?? m.default })));
 const MessagesPage  = React.lazy(() => import('./pages/MESSAGESPage').then(m => ({ default: m.MessagesPage  ?? m.default })));
 const FavoritesPage = React.lazy(() => import('./pages/FAVORITESPage').then(m => ({ default: m.FavoritesPage ?? m.default })));
 
-const queryClient = new QueryClient({
-  defaultOptions: { queries: { staleTime: 60_000, retry: 1 } },
-});
+const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 60_000, retry: 1 } } });
 
 const Spinner = () => (
-  <div className="flex items-center justify-center h-64 bg-background">
+  <div className="flex items-center justify-center h-64 bg-background" role="status" aria-label="Chargement">
     <div className="w-8 h-8 border-2 border-dz-green border-t-transparent rounded-full animate-spin" />
   </div>
 );
 
 const NotFound = () => (
-  <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 text-center p-8">
-    <div className="text-7xl mb-2">🦊</div>
-    <h1 className="text-3xl font-black text-foreground">404</h1>
-    <p className="text-muted-foreground mb-4 max-w-xs">Cette page n'existe pas… encore !</p>
-    <a href="/" className="px-6 py-3 bg-dz-green text-white font-bold rounded-2xl shadow-brand-sm">
-      Retour à l'accueil
-    </a>
+  <div className="min-h-[60vh] bg-background flex flex-col items-center justify-center gap-5 text-center p-8">
+    <img src={logoUrl} alt="Le Fennec DZ Market" className="w-28 h-28 object-contain opacity-60" />
+    <div>
+      <h1 className="text-5xl font-black text-foreground mb-2">404</h1>
+      <h2 className="text-xl font-bold text-foreground mb-2">Page introuvable</h2>
+      <p className="text-muted-foreground mb-6 max-w-sm">
+        La page que vous recherchez n'existe pas ou a été déplacée.
+      </p>
+    </div>
+    <div className="flex flex-col sm:flex-row gap-3">
+      <Link to="/" className="px-6 py-3 bg-dz-green text-white font-bold rounded-xl shadow-brand-sm hover:bg-dz-green2 transition-colors">
+        Retour à l'accueil
+      </Link>
+      <Link to="/search" className="px-6 py-3 border border-border text-foreground font-bold rounded-xl hover:bg-muted transition-colors">
+        Voir les annonces
+      </Link>
+    </div>
   </div>
 );
 
@@ -48,19 +55,23 @@ const App: React.FC = () => (
           <BrowserRouter>
             <div className="min-h-screen flex flex-col bg-background text-foreground">
               <Header />
-              <main className="flex-1">
+              <main id="main-content" className="flex-1">
                 <React.Suspense fallback={<Spinner />}>
                   <Routes>
-                    <Route path="/"             element={<HomePage />}         />
-                    <Route path="/search"       element={<SearchPage />}       />
-                    <Route path="/listing/:id"  element={<ListingDetailPage />}/>
-                    <Route path="/post"         element={<PostAdPage />}       />
-                    <Route path="/auth"         element={<AuthPage />}         />
-                    <Route path="/dashboard"    element={<DashboardPage />}    />
-                    <Route path="/messages"     element={<MessagesPage />}     />
-                    <Route path="/favorites"    element={<FavoritesPage />}    />
-                    <Route path="/legal/:slug"  element={<LegalPage />}        />
-                    <Route path="*"             element={<NotFound />}         />
+                    <Route path="/"                   element={<HomePage />}          />
+                    <Route path="/search"             element={<SearchPage />}        />
+                    <Route path="/listing/:id"        element={<ListingDetailPage />} />
+                    <Route path="/post"               element={<PostAdPage />}        />
+                    <Route path="/auth"               element={<AuthPage />}          />
+                    <Route path="/dashboard"          element={<DashboardPage />}     />
+                    <Route path="/messages"           element={<MessagesPage />}      />
+                    <Route path="/favorites"          element={<FavoritesPage />}     />
+                    <Route path="/legal/:slug"        element={<LegalPage />}         />
+                    {/* Alias shortcuts */}
+                    <Route path="/mentions-legales"   element={<LegalPage />}         />
+                    <Route path="/cgu"                element={<LegalPage />}         />
+                    <Route path="/confidentialite"    element={<LegalPage />}         />
+                    <Route path="*"                   element={<NotFound />}          />
                   </Routes>
                 </React.Suspense>
               </main>

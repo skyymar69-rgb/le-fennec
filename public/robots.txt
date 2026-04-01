@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /messages
+Disallow: /post
+Disallow: /auth
+
+Sitemap: https://le-fennec-birs.vercel.app/sitemap.xml

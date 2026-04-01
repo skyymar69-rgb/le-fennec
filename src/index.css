@@ -173,3 +173,24 @@
 }
 /* Disable transition on heavy elements */
 img, svg, canvas, video { transition: none; }
+
+/* ─── Performance: reduce layout shift ──────────────────── */
+img {
+  content-visibility: auto;
+}
+img[loading="lazy"] {
+  content-visibility: auto;
+}
+
+/* ─── Reduce motion for accessibility ───────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ─── Print ──────────────────────────────────────────────── */
+@media print {
+  .no-print, nav, header, footer { display: none !important; }
+}
