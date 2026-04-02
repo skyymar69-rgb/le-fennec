@@ -11,6 +11,7 @@ import { CATEGORIES }  from '../data/categories';
 import { WILAYAS }     from '../data/wilayas';
 import AutocompleteInput from '../components/ui/AutocompleteInput';
 import CategoryFormRouter from '../components/forms/CategoryFormRouter';
+import ImageUploader from '../components/ui/ImageUploader';
 import { QUARTIERS }   from '../lib/formData';
 import { moderateListing } from '../services/ModerationService';
 import { useAISuggestions } from '../lib/useAISuggestions';
@@ -427,40 +428,16 @@ const PostAdPage: React.FC = () => {
 
             {/* ── Photos ── */}
             <div className="bg-card border border-border rounded-2xl p-5 shadow-card">
-              <div className="flex items-center gap-2 mb-3">
+              <h3 className="text-sm font-black text-foreground mb-4 flex items-center gap-2">
                 <Camera size={14} className="text-dz-green"/>
-                <h3 className="text-sm font-black text-foreground">Photos</h3>
-                <span className="text-xs text-muted-foreground ml-auto">{form.images.length}/10</span>
-              </div>
-              <div className="grid grid-cols-4 gap-2">
-                {form.images.map((img,i) => (
-                  <div key={i} className="aspect-square rounded-xl overflow-hidden relative group">
-                    <img src={img} alt="" className="w-full h-full object-cover"/>
-                    {i===0 && <div className="absolute bottom-0 inset-x-0 bg-black/60 text-white text-[8px] text-center py-0.5 font-bold">PRINCIPALE</div>}
-                    <button onClick={() => set({images:form.images.filter((_,j)=>j!==i)})}
-                      className="absolute top-1 right-1 w-5 h-5 bg-black/60 hover:bg-dz-red text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
-                      <X size={10}/>
-                    </button>
-                  </div>
-                ))}
-                {form.images.length < 10 && (
-                  <label className="aspect-square rounded-xl border-2 border-dashed border-border hover:border-dz-green hover:bg-dz-green/5 flex flex-col items-center justify-center cursor-pointer gap-1 transition-all">
-                    <Upload size={18} className="text-muted-foreground"/>
-                    <span className="text-[9px] text-muted-foreground font-medium">Ajouter</span>
-                    <input type="file" accept="image/*" multiple className="hidden"
-                      onChange={e => {
-                        const files = Array.from(e.target.files || []);
-                        const urls  = files.map(f => URL.createObjectURL(f));
-                        set({images:[...form.images,...urls].slice(0,10)});
-                      }}/>
-                  </label>
-                )}
-              </div>
-              {form.images.length === 0 && (
-                <p className="text-xs text-amber-600 mt-2 flex items-center gap-1">
-                  <Info size={11}/> Les annonces avec photos reçoivent 5× plus de contacts
-                </p>
-              )}
+                Photos
+                <span className="ml-auto text-xs text-muted-foreground font-normal">{form.images.length}/10</span>
+              </h3>
+              <ImageUploader
+                images={form.images}
+                onChange={imgs => set({images: imgs})}
+                max={10}
+              />
             </div>
 
             {/* ── Moderation warning ── */}
