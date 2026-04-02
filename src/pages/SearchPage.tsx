@@ -1,388 +1,386 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { SlidersHorizontal, LayoutGrid, List, Map, X, ChevronDown } from 'lucide-react';
+import { useSearchParams, Link } from 'react-router-dom';
+import {
+  SlidersHorizontal, LayoutGrid, List, Map, X,
+  Search, TrendingUp, ChevronDown,
+} from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useApp } from '../contexts/AppContext';
 import ListingCard from '../components/listing/ListingCard';
 import AlgeriaMap from '../components/map/AlgeriaMap';
-import SmartSearchBar from '../components/ui/SmartSearchBar';
+import Pagination from '../components/ui/Pagination';
 import { CATEGORIES, getCategoryById } from '../data/categories';
 import { WILAYAS } from '../data/wilayas';
 import { filterAndSort } from '../services/RankingService';
 import type { SearchFilters } from '../types';
 
+const PER_PAGE = 24;
+
 const SearchPage: React.FC = () => {
-  const { t, language }        = useLanguage();
-  const { listings }            = useApp();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { t, language }                       = useLanguage();
+  const { listings }                           = useApp();
+  const [searchParams, setSearchParams]        = useSearchParams();
+  const [page,        setPage]                = useState(1);
+  const [viewMode,    setViewMode]            = useState<'grid' | 'list'>('grid');
+  const [showMap,     setShowMap]             = useState(false);
+  const [showFilters, setShowFilters]         = useState(false);
 
   const [filters, setFilters] = useState<SearchFilters>({
     q:          searchParams.get('q')        || '',
     categoryId: searchParams.get('category') || '',
     wilayaId:   searchParams.get('wilaya')   || '',
     sort:       (searchParams.get('sort') as any) || 'relevance',
+    priceMin:   searchParams.get('priceMin') ? Number(searchParams.get('priceMin')) : undefined,
     priceMax:   searchParams.get('priceMax') ? Number(searchParams.get('priceMax')) : undefined,
   });
 
-  const [viewMode,     setViewMode]     = useState<'grid' | 'list'>('grid');
-  const [showMap,      setShowMap]      = useState(false);
-  const [showFilters,  setShowFilters]  = useState(false);
-  const [dynValues,    setDynValues]    = useState<Record<string, string>>({});
-
   const activeCategory = getCategoryById(filters.categoryId || '');
 
-  // Sync URL → state
-  useEffect(() => {
-    setFilters(prev => ({
-      ...prev,
-      q:          searchParams.get('q')        || '',
-      categoryId: searchParams.get('category') || '',
-      wilayaId:   searchParams.get('wilaya')   || '',
-    }));
-  }, [searchParams]);
+  // Reset page when filters change
+  useEffect(() => { setPage(1); }, [filters]);
 
-  // Apply dynamic filters
-  const filtersWithDyn: SearchFilters = useMemo(() => ({
-    ...filters,
-    dynamic: Object.fromEntries(
-      Object.entries(dynValues).filter(([, v]) => v !== '')
-    ),
-  }), [filters, dynValues]);
-
-  const results = useMemo(() => filterAndSort(listings, filtersWithDyn), [listings, filtersWithDyn]);
-
+  // Sync URL
   const updateFilter = (key: keyof SearchFilters, value: any) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
-    const newParams = new URLSearchParams(searchParams);
-    if (value) newParams.set(key === 'categoryId' ? 'category' : key === 'wilayaId' ? 'wilaya' : key, String(value));
-    else       newParams.delete(key === 'categoryId' ? 'category' : key === 'wilayaId' ? 'wilaya' : key);
-    setSearchParams(newParams, { replace: true });
+    setFilters(prev => ({ ...prev, [key]: value || undefined }));
+    const p = new URLSearchParams(searchParams);
+    const urlKey = key === 'categoryId' ? 'category' : key === 'wilayaId' ? 'wilaya' : key;
+    if (value) p.set(urlKey, String(value));
+    else p.delete(urlKey);
+    setSearchParams(p, { replace: true });
   };
 
   const resetAll = () => {
-    setFilters({ q: '', sort: 'relevance' });
-    setDynValues({});
+    setFilters({ sort: 'relevance' });
     setSearchParams(new URLSearchParams(), { replace: true });
   };
 
-  const catName = (cat: (typeof CATEGORIES)[0]) =>
+  const allResults = useMemo(() => filterAndSort(listings, filters), [listings, filters]);
+
+  // Pagination
+  const totalResults = allResults.length;
+  const paginated    = useMemo(() =>
+    allResults.slice((page - 1) * PER_PAGE, page * PER_PAGE),
+  [allResults, page]);
+
+  // Listing counts per wilaya for map density
+  const listingCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    allResults.forEach(l => {
+      if (l.wilayaId) counts[l.wilayaId] = (counts[l.wilayaId] || 0) + 1;
+    });
+    return counts;
+  }, [allResults]);
+
+  const catName = (cat: typeof CATEGORIES[0]) =>
     language === 'ar' ? cat.nameAr : language === 'en' ? cat.nameEn : cat.nameFr;
 
   const wilayaName = (code: string) => {
     const w = WILAYAS.find(x => x.code === code);
-    if (!w) return code;
-    return language === 'ar' ? w.nameAr : language === 'en' ? w.nameEn : w.nameFr;
+    return w ? (language === 'ar' ? w.nameAr : language === 'en' ? w.nameEn : w.nameFr) : code;
   };
 
-  return (
-    <div className="min-h-screen bg-background flex flex-col">
+  const activeFiltersCount = [
+    filters.q, filters.wilayaId, filters.categoryId,
+    filters.priceMin, filters.priceMax,
+  ].filter(Boolean).length;
 
-      {/* ── Search bar strip ── */}
-      <div className="bg-card border-b border-border sticky top-[56px] z-30 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <div className="flex flex-col sm:flex-row gap-2">
-            <div className="flex-1 max-w-xl">
-              <SmartSearchBar isCompact defaultQuery={filters.q} onSearch={(q) => updateFilter('q', q)} />
+  return (
+    <div className="min-h-screen bg-muted/30">
+
+      {/* ── Sticky search bar ── */}
+      <div className="bg-card border-b border-border sticky top-[54px] z-30 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 space-y-2.5">
+
+          {/* Row 1: search input + controls */}
+          <div className="flex gap-2 items-center">
+            {/* Search */}
+            <div className="flex-1 relative max-w-xl">
+              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" aria-hidden/>
+              <input
+                type="text"
+                value={filters.q || ''}
+                onChange={e => updateFilter('q', e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && setPage(1)}
+                placeholder={t.searchPlaceholder}
+                className="w-full pl-9 pr-4 py-2.5 bg-background border border-border rounded-xl text-sm outline-none focus:border-dz-green transition-all"
+                aria-label="Rechercher des annonces"
+              />
             </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              {/* Filters toggle */}
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-sm font-semibold transition-all
-                  ${showFilters ? 'bg-dz-green text-white border-dz-green' : 'bg-background border-border text-foreground hover:bg-muted'}`}
-              >
-                <SlidersHorizontal size={14} />
-                {t.filters}
-              </button>
-              {/* Sort */}
+
+            {/* Filters toggle */}
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`relative flex items-center gap-1.5 px-3 py-2.5 rounded-xl border text-sm font-semibold transition-all ${showFilters ? 'bg-dz-green text-white border-dz-green' : 'bg-background border-border hover:bg-muted'}`}
+              aria-expanded={showFilters}
+            >
+              <SlidersHorizontal size={14}/>
+              <span className="hidden sm:inline">{t.filters}</span>
+              {activeFiltersCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-dz-red text-white text-[9px] font-black rounded-full flex items-center justify-center">
+                  {activeFiltersCount}
+                </span>
+              )}
+            </button>
+
+            {/* Sort */}
+            <div className="relative hidden sm:block">
               <select
                 value={filters.sort || 'relevance'}
                 onChange={e => updateFilter('sort', e.target.value)}
-                className="px-3 py-2 rounded-xl border border-border bg-background text-sm font-semibold text-foreground outline-none cursor-pointer"
+                className="appearance-none pl-3 pr-8 py-2.5 bg-background border border-border rounded-xl text-sm font-semibold outline-none cursor-pointer focus:border-dz-green"
+                aria-label="Trier par"
               >
-                <option value="relevance">{t.sortRelevance}</option>
-                <option value="date">{t.sortDate}</option>
-                <option value="price_asc">{t.sortPriceAsc}</option>
-                <option value="price_desc">{t.sortPriceDesc}</option>
-                <option value="trust">{t.sortTrust}</option>
+                <option value="relevance">Pertinence</option>
+                <option value="date">Plus récent</option>
+                <option value="price_asc">Prix croissant</option>
+                <option value="price_desc">Prix décroissant</option>
+                <option value="trust">Vendeur fiable</option>
               </select>
-              {/* View toggle */}
-              <div className="flex bg-muted rounded-xl p-1 gap-0.5">
-                <button onClick={() => setViewMode('grid')}
-                  className={`p-1.5 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-card shadow-sm text-dz-green' : 'text-muted-foreground'}`}>
-                  <LayoutGrid size={15} />
-                </button>
-                <button onClick={() => setViewMode('list')}
-                  className={`p-1.5 rounded-lg transition-all ${viewMode === 'list' ? 'bg-card shadow-sm text-dz-green' : 'text-muted-foreground'}`}>
-                  <List size={15} />
-                </button>
-              </div>
-              {/* Map toggle */}
-              <button
-                onClick={() => setShowMap(!showMap)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-sm font-semibold transition-all
-                  ${showMap ? 'bg-dz-green text-white border-dz-green' : 'bg-background border-border text-foreground hover:bg-muted'}`}
-              >
-                <Map size={14} />
-                <span className="hidden sm:inline">{t.mapView}</span>
-              </button>
+              <ChevronDown size={13} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"/>
             </div>
+
+            {/* View toggle */}
+            <div className="flex bg-muted rounded-xl p-1 gap-0.5" role="group" aria-label="Mode d'affichage">
+              {[['grid', LayoutGrid], ['list', List]].map(([mode, Icon]) => (
+                <button key={mode as string}
+                  onClick={() => setViewMode(mode as 'grid' | 'list')}
+                  aria-pressed={viewMode === mode}
+                  className={`p-1.5 rounded-lg transition-all ${viewMode === mode ? 'bg-card shadow-sm text-dz-green' : 'text-muted-foreground'}`}>
+                  <Icon size={15}/>
+                </button>
+              ))}
+            </div>
+
+            {/* Map toggle */}
+            <button
+              onClick={() => setShowMap(!showMap)}
+              aria-pressed={showMap}
+              className={`hidden lg:flex items-center gap-1.5 px-3 py-2.5 rounded-xl border text-sm font-semibold transition-all ${showMap ? 'bg-dz-green text-white border-dz-green' : 'bg-background border-border hover:bg-muted'}`}>
+              <Map size={14}/>
+              Carte
+            </button>
           </div>
 
-          {/* Category pills */}
-          <div className="flex gap-1.5 mt-2.5 overflow-x-auto no-scrollbar pb-0.5">
+          {/* Row 2: category pills */}
+          <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5" role="list" aria-label="Filtrer par catégorie">
             <button
               onClick={() => updateFilter('categoryId', '')}
-              className={`shrink-0 px-3 py-1 rounded-full text-xs font-bold transition-all border
-                ${!filters.categoryId ? 'bg-foreground text-background border-foreground' : 'bg-background border-border text-muted-foreground hover:bg-muted'}`}
-            >
-              {language === 'ar' ? 'الكل' : language === 'en' ? 'All' : 'Toutes'}
+              className={`shrink-0 px-3 py-1 rounded-full text-xs font-bold transition-all border ${!filters.categoryId ? 'bg-foreground text-background border-foreground' : 'bg-background border-border text-muted-foreground hover:bg-muted'}`}>
+              {language === 'ar' ? 'الكل' : 'Toutes'}
             </button>
             {CATEGORIES.map(cat => (
               <button
                 key={cat.id}
-                onClick={() => { updateFilter('categoryId', filters.categoryId === cat.id ? '' : cat.id); setDynValues({}); }}
-                className={`shrink-0 flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all border
-                  ${filters.categoryId === cat.id ? 'text-white border-transparent' : 'bg-background border-border text-muted-foreground hover:bg-muted'}`}
-                style={filters.categoryId === cat.id ? { background: cat.color } : {}}
-              >
+                onClick={() => updateFilter('categoryId', filters.categoryId === cat.id ? '' : cat.id)}
+                className={`shrink-0 flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all border ${
+                  filters.categoryId === cat.id
+                    ? 'text-white border-transparent'
+                    : 'bg-background border-border text-muted-foreground hover:bg-muted'
+                }`}
+                style={filters.categoryId === cat.id ? { background: cat.color } : {}}>
                 <span>{cat.icon}</span>
-                {catName(cat)}
+                <span>{catName(cat)}</span>
               </button>
             ))}
           </div>
         </div>
       </div>
 
-      {/* ── Main layout ── */}
-      <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <div className="flex gap-6 py-5 pb-24 md:pb-6">
-
-          {/* ── Sidebar filters ── */}
-          {showFilters && (
-            <aside className="w-64 shrink-0 hidden md:block space-y-5">
-              <div className="sticky top-[160px] space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="font-bold text-foreground text-sm">{t.filters}</span>
-                  <button onClick={resetAll} className="text-xs text-dz-green hover:underline font-semibold">{t.reset}</button>
-                </div>
-
-                {/* Price range */}
-                <div>
-                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide block mb-2">{t.price}</label>
-                  <input
-                    type="range" min="0" max="100000000" step="500000"
-                    value={filters.priceMax ?? 100000000}
-                    onChange={e => updateFilter('priceMax', Number(e.target.value))}
-                    className="w-full accent-dz-green"
-                  />
-                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                    <span>0</span>
-                    <span className="font-bold text-dz-green">
-                      {(filters.priceMax ?? 100000000).toLocaleString('fr-DZ')} DA
-                    </span>
-                  </div>
-                </div>
-
-                {/* Wilaya */}
-                <div>
-                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide block mb-2">
-                    {language === 'ar' ? 'الولاية' : 'Wilaya'}
-                  </label>
-                  <select
-                    value={filters.wilayaId || ''}
-                    onChange={e => updateFilter('wilayaId', e.target.value)}
-                    className="w-full bg-background border border-border rounded-xl px-3 py-2 text-sm outline-none cursor-pointer"
-                  >
-                    <option value="">{t.allAlgeria}</option>
-                    {WILAYAS.map(w => (
-                      <option key={w.code} value={w.code}>
-                        {language === 'ar' ? w.nameAr : language === 'en' ? w.nameEn : w.nameFr}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Dynamic filters by category */}
-                {activeCategory?.filters?.map(f => (
-                  <div key={f.id}>
-                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide block mb-2">
-                      {language === 'ar' ? f.labelAr : language === 'en' ? f.labelEn : f.labelFr}
-                    </label>
-                    {f.type === 'select' ? (
-                      <select
-                        value={dynValues[f.id] || ''}
-                        onChange={e => setDynValues(prev => ({ ...prev, [f.id]: e.target.value }))}
-                        className="w-full bg-background border border-border rounded-xl px-3 py-2 text-sm outline-none cursor-pointer"
-                      >
-                        <option value="">
-                          {language === 'ar' ? 'الكل' : language === 'en' ? 'All' : 'Tous'}
-                        </option>
-                        {f.options?.map(opt => (
-                          <option key={String(opt.value)} value={String(opt.value)}>
-                            {language === 'ar' ? opt.labelAr : language === 'en' ? opt.labelEn : opt.labelFr}
-                          </option>
-                        ))}
-                      </select>
-                    ) : f.type === 'number' ? (
-                      <input
-                        type="number" placeholder={f.placeholder}
-                        value={dynValues[f.id] || ''}
-                        onChange={e => setDynValues(prev => ({ ...prev, [f.id]: e.target.value }))}
-                        className="w-full bg-background border border-border rounded-xl px-3 py-2 text-sm outline-none"
-                      />
-                    ) : null}
-                  </div>
-                ))}
-
-                {/* With photo */}
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={!!filters.withPhoto}
-                    onChange={e => updateFilter('withPhoto', e.target.checked)}
-                    className="rounded accent-dz-green"
-                  />
-                  <span className="text-sm text-foreground">
-                    {language === 'ar' ? 'بصور فقط' : language === 'en' ? 'With photo only' : 'Avec photo uniquement'}
-                  </span>
+      {/* ── Filters panel ── */}
+      {showFilters && (
+        <div className="bg-card border-b border-border shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {/* Wilaya */}
+              <div>
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide block mb-1.5">
+                  Wilaya
                 </label>
-
-                {/* Apply (mobile) */}
-                <button
-                  onClick={() => setShowFilters(false)}
-                  className="w-full py-2.5 bg-dz-green text-white font-bold rounded-xl text-sm hidden"
+                <select
+                  value={filters.wilayaId || ''}
+                  onChange={e => updateFilter('wilayaId', e.target.value)}
+                  className="w-full bg-muted border border-border rounded-xl px-3 py-2.5 text-sm outline-none focus:border-dz-green cursor-pointer"
                 >
-                  {t.apply}
+                  <option value="">{t.allAlgeria}</option>
+                  {WILAYAS.map(w => (
+                    <option key={w.code} value={w.code}>
+                      {language === 'ar' ? w.nameAr : language === 'en' ? w.nameEn : w.nameFr}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Prix min */}
+              <div>
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide block mb-1.5">
+                  Prix min (DA)
+                </label>
+                <input
+                  type="number" min="0" step="10000"
+                  value={filters.priceMin || ''}
+                  onChange={e => updateFilter('priceMin', e.target.value ? Number(e.target.value) : undefined)}
+                  placeholder="0"
+                  className="w-full bg-muted border border-border rounded-xl px-3 py-2.5 text-sm outline-none focus:border-dz-green"
+                />
+              </div>
+
+              {/* Prix max */}
+              <div>
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide block mb-1.5">
+                  Prix max (DA)
+                </label>
+                <input
+                  type="number" min="0" step="10000"
+                  value={filters.priceMax || ''}
+                  onChange={e => updateFilter('priceMax', e.target.value ? Number(e.target.value) : undefined)}
+                  placeholder="Illimité"
+                  className="w-full bg-muted border border-border rounded-xl px-3 py-2.5 text-sm outline-none focus:border-dz-green"
+                />
+              </div>
+
+              {/* Sort (mobile) + Reset */}
+              <div className="flex flex-col justify-end gap-2">
+                <select
+                  value={filters.sort || 'relevance'}
+                  onChange={e => updateFilter('sort', e.target.value)}
+                  className="sm:hidden bg-muted border border-border rounded-xl px-3 py-2.5 text-sm outline-none cursor-pointer"
+                >
+                  <option value="relevance">Pertinence</option>
+                  <option value="date">Plus récent</option>
+                  <option value="price_asc">Prix ↑</option>
+                  <option value="price_desc">Prix ↓</option>
+                </select>
+                <button
+                  onClick={resetAll}
+                  className="w-full py-2.5 border border-border rounded-xl text-sm font-semibold text-muted-foreground hover:bg-muted transition-colors flex items-center justify-center gap-2"
+                >
+                  <X size={14}/> Réinitialiser
                 </button>
               </div>
-            </aside>
-          )}
+            </div>
 
-          {/* ── Results ── */}
-          <main className="flex-1 min-w-0">
-            {/* Active filters chips */}
-            {(filters.q || filters.wilayaId || filters.categoryId || filters.priceMax) && (
-              <div className="flex flex-wrap gap-2 mb-4">
+            {/* Active filter chips */}
+            {activeFiltersCount > 0 && (
+              <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-border">
                 {filters.q && (
-                  <span className="flex items-center gap-1 bg-dz-green/10 text-dz-green text-xs font-semibold px-3 py-1.5 rounded-full border border-dz-green/20">
+                  <span className="flex items-center gap-1.5 bg-dz-green/10 text-dz-green text-xs font-bold px-3 py-1 rounded-full border border-dz-green/20">
                     🔍 {filters.q}
-                    <button onClick={() => updateFilter('q', '')}><X size={12} /></button>
+                    <button onClick={() => updateFilter('q', '')}><X size={11}/></button>
                   </span>
                 )}
                 {filters.wilayaId && (
-                  <span className="flex items-center gap-1 bg-dz-green/10 text-dz-green text-xs font-semibold px-3 py-1.5 rounded-full border border-dz-green/20">
+                  <span className="flex items-center gap-1.5 bg-dz-green/10 text-dz-green text-xs font-bold px-3 py-1 rounded-full border border-dz-green/20">
                     📍 {wilayaName(filters.wilayaId)}
-                    <button onClick={() => updateFilter('wilayaId', '')}><X size={12} /></button>
+                    <button onClick={() => updateFilter('wilayaId', '')}><X size={11}/></button>
                   </span>
                 )}
-                <button onClick={resetAll} className="text-xs text-dz-red hover:underline font-semibold px-2">
-                  {t.reset}
-                </button>
+                {filters.priceMin && (
+                  <span className="flex items-center gap-1.5 bg-blue-500/10 text-blue-600 text-xs font-bold px-3 py-1 rounded-full border border-blue-500/20">
+                    ≥ {Number(filters.priceMin).toLocaleString()} DA
+                    <button onClick={() => updateFilter('priceMin', undefined)}><X size={11}/></button>
+                  </span>
+                )}
+                {filters.priceMax && (
+                  <span className="flex items-center gap-1.5 bg-blue-500/10 text-blue-600 text-xs font-bold px-3 py-1 rounded-full border border-blue-500/20">
+                    ≤ {Number(filters.priceMax).toLocaleString()} DA
+                    <button onClick={() => updateFilter('priceMax', undefined)}><X size={11}/></button>
+                  </span>
+                )}
               </div>
             )}
+          </div>
+        </div>
+      )}
 
+      {/* ── Main layout ── */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+        <div className="flex gap-6">
+
+          {/* Results */}
+          <main className="flex-1 min-w-0">
             {/* Result count */}
-            <p className="text-sm text-muted-foreground mb-4 font-medium">
-              <span className="font-black text-foreground">{results.length}</span> {t.results}
-            </p>
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-sm text-muted-foreground">
+                <span className="font-black text-foreground text-base">{totalResults.toLocaleString()}</span>{' '}
+                annonce{totalResults !== 1 ? 's' : ''}
+                {filters.categoryId && activeCategory && (
+                  <span className="ml-1 text-dz-green font-semibold">· {catName(activeCategory)}</span>
+                )}
+                {filters.wilayaId && (
+                  <span className="ml-1 text-dz-green font-semibold">· {wilayaName(filters.wilayaId)}</span>
+                )}
+              </p>
+              {totalResults > 0 && (
+                <p className="text-xs text-muted-foreground hidden sm:block">
+                  Page {page} · {Math.min(page * PER_PAGE, totalResults)} / {totalResults}
+                </p>
+              )}
+            </div>
 
             {/* Empty state */}
-            {results.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 text-center">
+            {totalResults === 0 ? (
+              <div className="flex flex-col items-center justify-center py-24 text-center bg-card rounded-3xl border border-border">
                 <div className="text-6xl mb-4">🔍</div>
-                <h3 className="text-xl font-bold text-foreground mb-2">{t.noResults}</h3>
-                <p className="text-muted-foreground mb-6 max-w-xs">
-                  {language === 'ar' ? 'جرب تعديل فلاترك أو توسيع نطاق بحثك'
-                    : language === 'en' ? 'Try adjusting your filters or broadening your search'
-                    : 'Essayez de modifier vos filtres ou d\'élargir votre recherche'}
+                <h3 className="text-xl font-black text-foreground mb-2">Aucune annonce trouvée</h3>
+                <p className="text-muted-foreground mb-6 max-w-xs leading-relaxed">
+                  Essayez avec des mots-clés différents ou modifiez vos filtres.
                 </p>
                 <button onClick={resetAll}
-                  className="px-6 py-2.5 bg-dz-green text-white font-bold rounded-xl text-sm shadow-brand-sm">
-                  {t.reset}
+                  className="px-6 py-2.5 bg-dz-green text-white font-bold rounded-xl shadow-brand-sm hover:bg-dz-green2 transition-colors">
+                  Effacer les filtres
                 </button>
               </div>
             ) : (
-              <div className={
-                viewMode === 'grid'
-                  ? 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4'
-                  : 'flex flex-col gap-3'
-              }>
-                {results.map(l => (
-                  <ListingCard key={l.id} listing={l} layout={viewMode === 'list' ? 'list' : 'grid'} />
-                ))}
-              </div>
+              <>
+                {/* Grid/List */}
+                <div className={
+                  viewMode === 'grid'
+                    ? 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4'
+                    : 'flex flex-col gap-3'
+                }>
+                  {paginated.map(l => (
+                    <ListingCard key={l.id} listing={l} layout={viewMode === 'list' ? 'list' : 'grid'}/>
+                  ))}
+                </div>
+
+                {/* Pagination */}
+                <Pagination
+                  current={page}
+                  total={totalResults}
+                  perPage={PER_PAGE}
+                  onChange={setPage}
+                />
+              </>
             )}
           </main>
 
-          {/* ── Map panel ── */}
+          {/* Map panel */}
           {showMap && (
             <aside className="hidden lg:block w-72 shrink-0">
-              <div className="sticky top-[160px] bg-card border border-border rounded-2xl p-4">
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-3">{t.searchByRegion}</p>
+              <div className="sticky top-[160px] bg-card border border-border rounded-2xl p-4 shadow-card">
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-3">
+                  {t.searchByRegion}
+                </p>
                 <AlgeriaMap
                   compact
                   selectedWilaya={filters.wilayaId}
-                  onSelectWilaya={(code) => updateFilter('wilayaId', code)}
-                  className="w-full aspect-[5/6]"
+                  listingCounts={listingCounts}
+                  onSelectWilaya={(code) => updateFilter('wilayaId', filters.wilayaId === code ? '' : code)}
+                  className="w-full aspect-[480/560]"
                 />
-                <div className="mt-3 space-y-1">
-                  {WILAYAS.filter(w => ['16','31','25','23','09'].includes(w.code)).map(w => (
-                    <button key={w.code}
-                      onClick={() => updateFilter('wilayaId', w.code)}
-                      className={`w-full flex justify-between items-center px-3 py-1.5 rounded-lg text-xs font-medium transition-colors
-                        ${filters.wilayaId === w.code ? 'bg-dz-green text-white' : 'hover:bg-muted text-foreground'}`}
-                    >
-                      <span>{language === 'ar' ? w.nameAr : language === 'en' ? w.nameEn : w.nameFr}</span>
-                    </button>
-                  ))}
-                </div>
+                {filters.wilayaId && (
+                  <button
+                    onClick={() => updateFilter('wilayaId', '')}
+                    className="w-full mt-2 text-xs text-dz-green font-bold hover:underline"
+                  >
+                    ✕ Retirer le filtre wilaya
+                  </button>
+                )}
               </div>
             </aside>
           )}
         </div>
       </div>
-
-      {/* Mobile filters overlay */}
-      {showFilters && (
-        <div className="md:hidden fixed inset-0 bg-black/50 z-40 flex items-end" onClick={() => setShowFilters(false)}>
-          <div className="bg-card w-full rounded-t-3xl p-5 max-h-[80vh] overflow-y-auto"
-            onClick={e => e.stopPropagation()}>
-            <div className="flex justify-between mb-5">
-              <h3 className="font-bold text-lg">{t.filters}</h3>
-              <button onClick={() => setShowFilters(false)}><X size={20} /></button>
-            </div>
-            {/* Price */}
-            <div className="mb-5">
-              <label className="text-xs font-bold text-muted-foreground uppercase mb-2 block">{t.price}</label>
-              <input type="range" min="0" max="100000000" step="500000"
-                value={filters.priceMax ?? 100000000}
-                onChange={e => updateFilter('priceMax', Number(e.target.value))}
-                className="w-full accent-dz-green" />
-              <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                <span>0</span>
-                <span className="font-bold text-dz-green">{(filters.priceMax ?? 100000000).toLocaleString()} DA</span>
-              </div>
-            </div>
-            {/* Wilaya */}
-            <div className="mb-5">
-              <label className="text-xs font-bold text-muted-foreground uppercase mb-2 block">Wilaya</label>
-              <select value={filters.wilayaId || ''}
-                onChange={e => updateFilter('wilayaId', e.target.value)}
-                className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-sm outline-none">
-                <option value="">{t.allAlgeria}</option>
-                {WILAYAS.map(w => (
-                  <option key={w.code} value={w.code}>{language === 'ar' ? w.nameAr : w.nameFr}</option>
-                ))}
-              </select>
-            </div>
-            <button onClick={() => setShowFilters(false)}
-              className="w-full py-3 bg-dz-green text-white font-bold rounded-xl shadow-brand-sm">
-              {t.apply} ({results.length} {t.results})
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
