@@ -144,7 +144,7 @@ interface AppState {
 
   threads:     MessageThread[];
   sendMessage: (threadId: string, text: string) => void;
-  startThread: (t: Omit<MessageThread, 'messages' | 'unread'>) => string;
+  startThread: (listingId: string, userId: string, firstMsg?: string) => string;
   markRead:    (threadId: string) => void;
 
   filters:      SearchFilters;
@@ -218,27 +218,124 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
   }, []);
 
   const sendMessage = useCallback((threadId: string, text: string) => {
+    const myId = user?.id || 'me';
     setThreads(prev => {
-      const msg: Message = { id: Date.now().toString(), from: 'u1', text, ts: Date.now() };
+      const msg: Message = { id: Date.now().toString(), from: myId, text, ts: Date.now(), read: false };
       const next = prev.map(t => t.id !== threadId ? t : {
         ...t, unread: 0, lastTs: Date.now(), messages: [...t.messages, msg],
       });
       persist('fennec_threads', next);
       return next;
     });
-  }, []);
+    // 40% chance of auto-reply from seller
+    if (Math.random() < 0.4) {
+      setTimeout(() => {
+        const replies = [
+          "D'accord, je vous attends.",
+          'Parfait, à bientôt !',
+          'Oui bien sûr, pas de problème.',
+          'Entendu. Vous pouvez venir demain ?',
+          'Ok, le prix est négociable pour vous.',
+        ];
+        setThreads(prev => {
+          const thread = prev.find(t => t.id === threadId);
+          if (!thread) return prev;
+          const autoMsg: Message = {
+            id: (Date.now() + 1).toString(), from: thread.userId,
+            text: replies[Math.floor(Math.random() * replies.length)],
+            ts: Date.now(), read: false, type: 'text',
+          };
+          const next = prev.map(t => t.id !== threadId ? t : {
+            ...t, messages: [...t.messages, autoMsg], unread: t.unread + 1, lastTs: Date.now(),
+          });
+          persist('fennec_threads', next);
+          return next;
+        });
+      }, 1500 + Math.random() * 3000);
+    }
+  }, [user]);
 
-  const startThread = useCallback((t: Omit<MessageThread, 'messages' | 'unread'>): string => {
-    const existing = threads.find(th => th.listingId === t.listingId && th.userId === t.userId);
-    if (existing) return existing.id;
-    const newT: MessageThread = { ...t, messages: [], unread: 0, lastTs: Date.now() };
+  const startThread = useCallback((
+    listingId: string, userId: string, firstMsg?: string
+  ): string => {
+    const existing = threads.find(th => th.listingId === listingId);
+    if (existing) {
+      if (firstMsg) {
+        const msg: Message = { id: Date.now().toString(), from: user?.id || 'me', text: firstMsg, ts: Date.now(), read: false };
+        setThreads(prev => {
+          const next = prev.map(t => t.id !== existing.id ? t : {
+            ...t, messages: [...t.messages, msg], lastTs: Date.now(),
+          });
+          persist('fennec_threads', next);
+          return next;
+        });
+        // Simulate seller reply after 2-4s
+        setTimeout(() => {
+          const replies = [
+            "Bonjour ! Oui, c'est toujours disponible.",
+            "Bonjour ! Vous pouvez me contacter au numéro indiqué.",
+            "Salut, oui toujours dispo. Quand pouvez-vous passer ?",
+            "Bonjour ! Le prix est ferme mais on peut discuter.",
+          ];
+          const autoReply: Message = {
+            id: (Date.now() + 1).toString(),
+            from: userId, 
+            text: replies[Math.floor(Math.random() * replies.length)],
+            ts: Date.now(), read: false, type: 'text',
+          };
+          setThreads(prev => {
+            const next = prev.map(t => t.id !== existing.id ? t : {
+              ...t, messages: [...t.messages, autoReply], unread: t.unread + 1, lastTs: Date.now(),
+            });
+            persist('fennec_threads', next);
+            return next;
+          });
+        }, 2000 + Math.random() * 2000);
+      }
+      return existing.id;
+    }
+
+    const listing = ALL_LISTINGS.find(l => l.id === listingId);
+    const newT: MessageThread = {
+      id: `thread_${Date.now()}`,
+      userId, userName: 'Vendeur', userAvatar: '',
+      listingId, listingTitle: listing?.title || '',
+      listingPrice: listing?.price, listingImage: listing?.imageUrl,
+      messages: firstMsg ? [{
+        id: Date.now().toString(), from: user?.id || 'me',
+        text: firstMsg, ts: Date.now(), read: false,
+      }] : [],
+      unread: 0, lastTs: Date.now(),
+    };
     setThreads(prev => {
       const next = [newT, ...prev];
       persist('fennec_threads', next);
       return next;
     });
+    // Auto reply
+    if (firstMsg) {
+      setTimeout(() => {
+        const replies = [
+          "Bonjour ! Oui, c'est toujours disponible.",
+          "Salut, merci pour votre intérêt. Venez voir quand vous voulez.",
+          "Bonjour ! Prix ferme. Je suis disponible ce week-end.",
+        ];
+        const autoReply: Message = {
+          id: (Date.now() + 1).toString(), from: userId,
+          text: replies[Math.floor(Math.random() * replies.length)],
+          ts: Date.now(), read: false, type: 'text',
+        };
+        setThreads(prev => {
+          const next = prev.map(t => t.id !== newT.id ? t : {
+            ...t, messages: [...t.messages, autoReply], unread: 1, lastTs: Date.now(),
+          });
+          persist('fennec_threads', next);
+          return next;
+        });
+      }, 2500 + Math.random() * 2000);
+    }
     return newT.id;
-  }, [threads]);
+  }, [threads, user]);
 
   const markRead = useCallback((threadId: string) => {
     setThreads(prev => {
