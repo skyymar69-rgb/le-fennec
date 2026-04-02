@@ -18,6 +18,7 @@ const AuthPage      = React.lazy(() => import('./pages/AuthPage').then(m => ({ d
 const DashboardPage = React.lazy(() => import('./pages/DASHBOARDPage').then(m => ({ default: m.DashboardPage ?? m.default })));
 const MessagesPage  = React.lazy(() => import('./pages/MESSAGESPage').then(m => ({ default: m.MessagesPage  ?? m.default })));
 const FavoritesPage = React.lazy(() => import('./pages/FAVORITESPage').then(m => ({ default: m.FavoritesPage ?? m.default })));
+const BoostPage     = React.lazy(() => import('./pages/BoostPage').then(m => ({ default: m.BoostPage ?? m.default })));
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 60_000, retry: 1 } } });
 
@@ -83,6 +84,7 @@ const App: React.FC = () => (
 
                   {/* 🛡️ Backoffice modération (protéger par rôle admin en prod) */}
                   <Route path="/moderation"         element={<ModerationPage />}    />
+                  <Route path="/boost"              element={<BoostPage />}         />
 
                   {/* 404 */}
                   <Route path="*"                   element={<NotFound />}          />

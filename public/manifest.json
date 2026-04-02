@@ -1,0 +1,39 @@
+{
+  "name": "Le Fennec DZ Market",
+  "short_name": "Le Fennec",
+  "description": "La plateforme d'annonces classées N°1 en Algérie",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#006233",
+  "theme_color": "#006233",
+  "orientation": "portrait-primary",
+  "lang": "fr",
+  "icons": [
+    { "src": "/favicon.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable any" },
+    { "src": "/favicon.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable any" }
+  ],
+  "screenshots": [
+    {
+      "src": "/favicon.png",
+      "type": "image/png",
+      "sizes": "390x844",
+      "form_factor": "narrow"
+    }
+  ],
+  "categories": ["shopping", "lifestyle", "business"],
+  "shortcuts": [
+    {
+      "name": "Déposer une annonce",
+      "short_name": "Déposer",
+      "description": "Publier une nouvelle annonce",
+      "url": "/post",
+      "icons": [{ "src": "/favicon.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Mes messages",
+      "short_name": "Messages",
+      "url": "/messages",
+      "icons": [{ "src": "/favicon.png", "sizes": "96x96" }]
+    }
+  ]
+}
