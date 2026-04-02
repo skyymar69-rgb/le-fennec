@@ -8,6 +8,7 @@ import ThemeSwitcher from '../components/ui/ThemeSwitcher';
 import LanguageSwitcher from '../components/ui/LanguageSwitcher';
 import logoUrl from '../assets/logo.png';
 import type { UserProfile } from '../types';
+import { supabase, isSupabaseEnabled } from '../lib/supabase';
 
 // ─── Password strength checker ─────────────────────────────────────────────
 function passwordStrength(p: string): { score: 0|1|2|3; label: string; color: string } {
@@ -81,34 +82,37 @@ export const AuthPage: React.FC = () => {
   const handleOAuth = async (providerId: string) => {
     setError(null);
     setLoading(providerId);
-    // Simulate OAuth round-trip
-    await new Promise(r => setTimeout(r, 1400));
 
-    // In production: receive real user data from OAuth callback
-    // For now: create a new empty profile (no fake name)
+    if (isSupabaseEnabled && supabase) {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: providerId as 'google' | 'facebook',
+        options: {
+          redirectTo: `${window.location.origin}${returnTo}`,
+        },
+      });
+      if (error) { setError(error.message); setLoading(null); }
+      return; // Supabase handles redirect
+    }
+
+    // Fallback demo
+    await new Promise(r => setTimeout(r, 1200));
+    const names: Record<string, string> = { google: 'Utilisateur Google', facebook: 'Utilisateur Facebook' };
+    const providerName = names[providerId] || 'Nouvel utilisateur';
     const mockEmail = `user_${Date.now().toString(36)}@${providerId}.oauth`;
-    // In production: name/email come from OAuth provider's profile
-    // For demo: generate a placeholder that user can change in Settings
-    const providerName = { google: 'Utilisateur Google', facebook: 'Utilisateur Facebook' }[providerId] || 'Nouvel utilisateur';
     const profile: UserProfile = {
-      id:            `oauth_${Date.now()}`,
-      name:          providerName,
-      email:         mockEmail,
-      phone:         '',
-      avatar:        `https://api.dicebear.com/7.x/initials/svg?seed=${mockEmail}&backgroundColor=006233&textColor=ffffff`,
-      memberSince:   new Date().getFullYear().toString(),
-      isEmailVerified:    true,   // OAuth = email auto-verified
-      isPhoneVerified:    false,
-      isIdentityVerified: false,
-      trustScore:         20,
-      badges:             [],
+      id: `oauth_${Date.now()}`, name: providerName,
+      email: mockEmail, phone: '',
+      avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${mockEmail}&backgroundColor=006233&textColor=ffffff`,
+      memberSince: new Date().getFullYear().toString(),
+      isEmailVerified: true, isPhoneVerified: false,
+      isIdentityVerified: false, trustScore: 20, badges: [],
     };
     login(profile);
     setLoading(null);
     navigate(returnTo, { replace: true });
   };
 
-  // ── Email form submit ───────────────────────────────────────────────────
+
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -126,6 +130,34 @@ export const AuthPage: React.FC = () => {
     }
 
     setLoading('email');
+
+    // Real Supabase auth
+    if (isSupabaseEnabled && supabase) {
+      if (mode === 'register') {
+        const { data, error } = await supabase.auth.signUp({
+          email: form.email.trim().toLowerCase(),
+          password: form.password,
+          options: { data: { full_name: form.name.trim() } },
+        });
+        if (error) { setError(error.message); setLoading(null); return; }
+        setSuccess('Compte créé ! Vérifiez votre email pour confirmer votre adresse.');
+        await new Promise(r => setTimeout(r, 2000));
+        if (data.user) navigate(returnTo, { replace: true });
+        setLoading(null);
+        return;
+      } else {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: form.email.trim().toLowerCase(),
+          password: form.password,
+        });
+        if (error) { setError('Email ou mot de passe incorrect.'); setLoading(null); return; }
+        if (data.user) navigate(returnTo, { replace: true });
+        setLoading(null);
+        return;
+      }
+    }
+
+    // Fallback simulation
     await new Promise(r => setTimeout(r, 900));
 
     const profile: UserProfile = {

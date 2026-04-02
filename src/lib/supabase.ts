@@ -1,19 +1,29 @@
-/**
- * Supabase client — Le Fennec DZ Market
- * Variables d'env requises dans Vercel :
- *   VITE_SUPABASE_URL      → https://xxxx.supabase.co
- *   VITE_SUPABASE_ANON_KEY → eyJhbGciOi...
- */
 import { createClient } from '@supabase/supabase-js';
 
-const URL_KEY  = import.meta.env.VITE_SUPABASE_URL       as string | undefined;
-const ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY  as string | undefined;
+const SUPABASE_URL  = import.meta.env.VITE_SUPABASE_URL  as string | undefined;
+const SUPABASE_ANON = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 
-export const supabase = URL_KEY && ANON_KEY
-  ? createClient(URL_KEY, ANON_KEY)
+export const supabase = SUPABASE_URL && SUPABASE_ANON
+  ? createClient(SUPABASE_URL, SUPABASE_ANON, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession:   true,
+        detectSessionInUrl: true,
+      },
+      realtime: {
+        params: { eventsPerSecond: 10 },
+      },
+    })
   : null;
 
 export const isSupabaseEnabled = !!supabase;
+
+// Log connection status
+if (supabase) {
+  console.log('✅ Supabase connecté:', SUPABASE_URL);
+} else {
+  console.log('⚠️  Supabase non configuré — mode localStorage');
+}
 
 export type DbListing = {
   id: string; title: string; description: string;
@@ -23,7 +33,8 @@ export type DbListing = {
   condition: string; images: string[]; image_url: string;
   attributes: Record<string, string>;
   user_id: string; status: string;
-  views: number; is_premium: boolean; is_urgent: boolean;
+  views: number; contacts: number;
+  is_premium: boolean; is_urgent: boolean;
   is_verified: boolean; boost_level: number;
   trust_score: number; quality_score: number;
   phone?: string; whatsapp?: boolean;
@@ -43,4 +54,12 @@ export type DbThread = {
   listing_price?: number;
   unread_buyer: number; unread_seller: number;
   last_message?: string; last_ts?: string; created_at: string;
+};
+
+export type DbProfile = {
+  id: string; name: string; phone?: string; avatar?: string;
+  member_since: string;
+  is_email_verified: boolean; is_phone_verified: boolean;
+  is_identity_verified: boolean;
+  trust_score: number; badges: string[];
 };
