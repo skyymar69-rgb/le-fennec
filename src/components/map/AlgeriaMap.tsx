@@ -59,7 +59,7 @@ const AlgeriaMap: React.FC<Props> = ({
   return (
     <div className={`relative select-none ${className}`}>
       <svg
-        viewBox="0 0 480 560"
+        viewBox="0 0 1000 1000"
         className="w-full h-full"
         role="img"
         aria-label="Carte interactive des 58 wilayas d'Algérie"
@@ -75,8 +75,8 @@ const AlgeriaMap: React.FC<Props> = ({
           </filter>
         </defs>
 
-        <rect x="0" y="0" width="480" height="30" fill="url(#seaGrad)"/>
-        <text x="240" y="19" textAnchor="middle" fontSize="8"
+        <rect x="0" y="0" width="1000" height="45" fill="url(#seaGrad)"/>
+        <text x="500" y="28" textAnchor="middle" fontSize="8"
           fontFamily="Inter,sans-serif" fontWeight="600" letterSpacing="3"
           fill="hsl(200,60%,55%)" opacity="0.8">
           {language === 'ar' ? 'البحر الأبيض المتوسط' : 'MÉDITERRANÉE'}
