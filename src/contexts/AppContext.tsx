@@ -26,7 +26,9 @@ interface AppCtx {
   sendMessage: (threadId: string, text: string) => void;
   startThread: (listingId: string, sellerId: string, firstMsg?: string) => string;
   markRead:    (threadId: string) => void;
-  isLoading:   boolean;
+  isLoading:        boolean;
+  updateListingStatus: (id: string, status: string) => void;
+  removeListing:    (id: string) => void;
 }
 
 const Ctx = createContext<AppCtx>({} as AppCtx);
@@ -366,8 +368,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setThreads(prev => { const n = prev.map(t => t.id === threadId ? { ...t, unread: 0 } : t); persist('fennec_threads', n); return n; });
   }, []);
 
+  const updateListingStatus = useCallback((id: string, status: string) => {
+    setUserListings(prev => {
+      const n = prev.map(l => l.id === id ? { ...l, status: status as any } : l);
+      persist('fennec_my_listings', n);
+      return n;
+    });
+    if (isSupabaseEnabled && supabase && user) {
+      supabase.from('listings').update({ status }).eq('id', id).eq('user_id', user.id).then();
+    }
+  }, [user]);
+
+  const removeListing = useCallback((id: string) => {
+    setUserListings(prev => {
+      const n = prev.filter(l => l.id !== id);
+      persist('fennec_my_listings', n);
+      return n;
+    });
+    setDbListings(prev => prev.filter(l => l.id !== id));
+    if (isSupabaseEnabled && supabase && user) {
+      supabase.from('listings').delete().eq('id', id).eq('user_id', user.id).then();
+    }
+  }, [user]);
+
   return (
-    <Ctx.Provider value={{ user, login, logout, listings, userListings, addListing, favorites, toggleFav, threads, sendMessage, startThread, markRead, isLoading }}>
+    <Ctx.Provider value={{ user, login, logout, listings, userListings, addListing, favorites, toggleFav, threads, sendMessage, startThread, markRead, isLoading, updateListingStatus, removeListing }}>
       {children}
     </Ctx.Provider>
   );

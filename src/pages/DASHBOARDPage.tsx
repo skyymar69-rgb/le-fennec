@@ -1,50 +1,58 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Package, MessageSquare, Heart, Settings,
-  TrendingUp, Eye, Bell, LogOut, Plus, Edit2, Trash2,
-  PauseCircle, PlayCircle, Rocket, Shield, CheckCircle2,
-  XCircle, AlertTriangle, ChevronRight, BarChart2, Users,
-  Clock, Star, ArrowUpRight, ArrowDownRight,
+  Eye, LogOut, Plus, Edit2, Trash2, Rocket, Shield,
+  CheckCircle2, ChevronRight, BarChart2, Clock, Star,
+  Bell, Zap, Phone, Camera, MapPin, TrendingUp, AlertCircle,
+  User, Lock, X,
 } from 'lucide-react';
-import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid } from 'recharts';
+import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { useLanguage } from '../contexts/LanguageContext';
-import { useApp } from '../contexts/AppContext';
-import logoUrl from '../assets/logo.png';
+import { useApp }      from '../contexts/AppContext';
 
-// Week data: zeros for new users — populated from real analytics in production
-const WEEK = [
-  { j:'Lun', vues:0, contacts:0 },
-  { j:'Mar', vues:0, contacts:0 },
-  { j:'Mer', vues:0, contacts:0 },
-  { j:'Jeu', vues:0, contacts:0 },
-  { j:'Ven', vues:0, contacts:0 },
-  { j:'Sam', vues:0, contacts:0 },
-  { j:'Dim', vues:0, contacts:0 },
-];
+type Tab = 'overview' | 'ads' | 'messages' | 'settings';
 
 export const DashboardPage: React.FC = () => {
-  const { t, language }    = useLanguage();
-  const navigate           = useNavigate();
-  const { user, logout, listings, updateListingStatus, removeListing, threads, favorites } = useApp();
-  const [tab,      setTab]      = useState<'overview'|'ads'|'stats'|'settings'>('overview');
-  const [delModal, setDelModal] = useState<string|null>(null);
+  const { language }   = useLanguage();
+  const navigate       = useNavigate();
+  const { user, logout, userListings, listings, threads, favorites, toggleFav, updateListingStatus, removeListing } = useApp();
+  const [tab,      setTab]      = useState<Tab>('overview');
+  const [delModal, setDelModal] = useState<string | null>(null);
+  const [nameEdit, setNameEdit] = useState('');
+  const [editingName, setEditingName] = useState(false);
 
-  const myAds   = listings.filter(l => l.userId === user?.id && l.status !== 'deleted');
-  const active  = myAds.filter(l => l.status === 'active');
-  const paused  = myAds.filter(l => l.status === 'paused');
-  const unread  = threads.reduce((s, t) => s + t.unread, 0);
-  const trust   = (user?.isEmailVerified ? 20 : 0) + (user?.isPhoneVerified ? 30 : 0) + (user?.isIdentityVerified ? 50 : 0);
+  const myAds      = userListings;
   const totalViews = myAds.reduce((s, l) => s + (l.views || 0), 0);
+  const unread     = threads.reduce((s, t) => s + t.unread, 0);
+  const favCount   = favorites.length;
 
+  // Build chart from listing timestamps
+  const chartData = useMemo(() => {
+    const days = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+    return days.map((j, i) => ({
+      j,
+      vues: myAds.filter(l => {
+        const d = new Date(l.timestamp || 0);
+        return d.getDay() === (i + 1) % 7;
+      }).reduce((s, l) => s + (l.views || 0), 0),
+    }));
+  }, [myAds]);
+
+  // ── Not logged in ──────────────────────────────────────────────────────
   if (!user) return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-5 p-6">
-      <img src={logoUrl} alt="Le Fennec" className="w-20 h-20 object-contain opacity-40" />
-      <div className="text-center">
-        <h2 className="text-xl font-black text-foreground mb-2">Espace personnel</h2>
-        <p className="text-muted-foreground text-sm">Connectez-vous pour gérer vos annonces</p>
+    <div className="min-h-[70vh] flex flex-col items-center justify-center gap-6 text-center p-6">
+      <div className="w-20 h-20 bg-dz-green/10 rounded-3xl flex items-center justify-center">
+        <Lock size={36} className="text-dz-green"/>
       </div>
-      <Link to="/auth" className="px-8 py-3 bg-dz-green text-white font-bold rounded-2xl shadow-brand-md">
+      <div>
+        <h2 className="text-2xl font-black text-foreground mb-2">Accès réservé</h2>
+        <p className="text-muted-foreground max-w-sm leading-relaxed">
+          Connectez-vous pour accéder à votre espace personnel.
+        </p>
+      </div>
+      <Link to="/auth" state={{ from: '/dashboard' }}
+        className="px-8 py-3.5 bg-dz-green text-white font-black rounded-2xl shadow-brand-md hover:bg-dz-green2 transition-all hover:-translate-y-0.5">
         Se connecter
       </Link>
     </div>
@@ -52,428 +60,427 @@ export const DashboardPage: React.FC = () => {
 
   const TABS = [
     { id:'overview', Icon:LayoutDashboard, label:'Tableau de bord' },
-    { id:'ads',      Icon:Package,         label:'Mes annonces',  badge: active.length },
-    { id:'stats',    Icon:BarChart2,        label:'Statistiques'  },
-    { id:'settings', Icon:Settings,        label:'Paramètres'    },
-  ] as const;
+    { id:'ads',      Icon:Package,         label:'Mes annonces', badge: myAds.length },
+    { id:'messages', Icon:MessageSquare,   label:'Messages',     badge: unread || undefined },
+    { id:'settings', Icon:Settings,        label:'Paramètres' },
+  ];
+
+  // Trust score calculation
+  const trust = user.trustScore || 0;
+  const trustColor = trust >= 70 ? 'text-dz-green' : trust >= 40 ? 'text-amber-500' : 'text-dz-red';
 
   return (
-    <div className="min-h-screen bg-muted/30 pb-24 md:pb-12">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-5">
+    <div className="min-h-screen bg-muted/30 pb-24 md:pb-10">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5">
 
-        {/* ── Profile completion banner (shown when name is placeholder) ── */}
-        {user && (user.name === '' || user.name === 'Utilisateur Google' || user.name === 'Utilisateur Facebook' || user.name === 'Nouvel utilisateur') && (
+        {/* ── Profile header ── */}
+        <div className="bg-card border border-border rounded-2xl p-5 shadow-card">
+          <div className="flex items-center gap-4">
+            {/* Avatar */}
+            <div className="relative shrink-0">
+              <div className="w-16 h-16 rounded-2xl overflow-hidden bg-dz-green/10 flex items-center justify-center">
+                {user.avatar ? (
+                  <img src={user.avatar} alt={user.name} className="w-full h-full object-cover"/>
+                ) : (
+                  <span className="text-2xl font-black text-dz-green">
+                    {user.name?.charAt(0)?.toUpperCase() || '?'}
+                  </span>
+                )}
+              </div>
+              {user.isVerified && (
+                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-dz-green rounded-full flex items-center justify-center border-2 border-card">
+                  <CheckCircle2 size={11} className="text-white"/>
+                </div>
+              )}
+            </div>
+
+            <div className="flex-1 min-w-0">
+              <h1 className="text-lg font-black text-foreground truncate">{user.name || 'Mon compte'}</h1>
+              <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+              <div className="flex items-center gap-2 mt-1.5">
+                <div className="flex items-center gap-1">
+                  <div className="h-1.5 w-20 bg-muted rounded-full overflow-hidden">
+                    <div className="h-full bg-dz-green rounded-full" style={{ width: `${trust}%` }}/>
+                  </div>
+                  <span className={`text-[11px] font-bold ${trustColor}`}>{trust}%</span>
+                </div>
+                <span className="text-[10px] text-muted-foreground">confiance</span>
+              </div>
+            </div>
+
+            <div className="flex gap-2 shrink-0">
+              <Link to="/post"
+                className="flex items-center gap-1.5 px-4 py-2.5 bg-dz-green text-white font-bold text-sm rounded-xl shadow-brand-sm hover:bg-dz-green2 transition-all">
+                <Plus size={15}/> Déposer
+              </Link>
+              <button onClick={() => { logout(); navigate('/'); }}
+                className="p-2.5 border border-border rounded-xl text-muted-foreground hover:text-dz-red hover:border-dz-red/30 transition-all"
+                title="Se déconnecter">
+                <LogOut size={16}/>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Profile completion banner ── */}
+        {trust < 40 && (
           <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 rounded-2xl px-4 py-3 flex items-center gap-3">
-            <span className="text-lg">✏️</span>
+            <AlertCircle size={18} className="text-amber-600 shrink-0"/>
             <div className="flex-1">
               <p className="text-sm font-bold text-amber-800 dark:text-amber-300">Complétez votre profil</p>
-              <p className="text-xs text-amber-700 dark:text-amber-400">Allez dans Paramètres pour ajouter votre vrai nom et augmenter votre score de confiance.</p>
+              <p className="text-xs text-amber-700 dark:text-amber-400">Vérifiez votre email et téléphone pour augmenter la confiance et obtenir plus de contacts.</p>
             </div>
-            <button onClick={() => setTab('settings')} className="text-xs font-bold text-white bg-amber-500 px-3 py-1.5 rounded-lg hover:bg-amber-600 transition-colors shrink-0">
+            <button onClick={() => setTab('settings')}
+              className="text-xs font-bold text-white bg-amber-500 px-3 py-1.5 rounded-lg shrink-0">
               Compléter →
             </button>
           </div>
         )}
 
-        {/* ── Top profile bar ── */}
-        <div className="bg-card border border-border rounded-2xl p-5 flex items-center gap-4 shadow-card">
-          <div className="relative">
-            <div className="w-14 h-14 rounded-2xl bg-dz-green/10 flex items-center justify-center text-2xl font-black text-dz-green border-2 border-dz-green/20 shrink-0">
-              {user.name.charAt(0).toUpperCase()}
-            </div>
-            <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-card ${trust >= 50 ? 'bg-dz-green' : 'bg-amber-400'}`} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="font-black text-foreground text-base">{user.name}</h2>
-              {user.isIdentityVerified && (
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-dz-green bg-dz-green/10 px-2 py-0.5 rounded-full">
-                  <CheckCircle2 size={9} /> Vérifié
-                </span>
-              )}
-            </div>
-            <p className="text-sm text-muted-foreground mt-0.5">{user.email}</p>
-            <div className="flex items-center gap-3 mt-2">
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <div className="h-1.5 w-20 bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-dz-green rounded-full transition-all" style={{ width: `${trust}%` }} />
-                </div>
-                <span className="font-semibold text-foreground">{trust}%</span>
-                <span>confiance</span>
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <Link to="/post"
-              className="hidden sm:flex items-center gap-1.5 bg-dz-green text-white text-sm font-bold px-4 py-2 rounded-xl shadow-brand-sm hover:bg-dz-green2 transition-colors">
-              <Plus size={15} strokeWidth={3} /> Nouvelle annonce
-            </Link>
-            <button onClick={() => { logout(); navigate('/'); }}
-              className="p-2.5 border border-border rounded-xl text-muted-foreground hover:text-dz-red hover:border-dz-red/30 transition-colors">
-              <LogOut size={16} />
-            </button>
-          </div>
-        </div>
-
-        {/* ── Tab navigation ── */}
-        <div className="bg-card border border-border rounded-2xl p-1.5 flex gap-1 shadow-card overflow-x-auto no-scrollbar">
+        {/* ── Tabs ── */}
+        <div className="flex gap-1 bg-card border border-border rounded-2xl p-1.5 overflow-x-auto no-scrollbar">
           {TABS.map(({ id, Icon, label, badge }) => (
-            <button key={id} onClick={() => setTab(id as any)}
-              className={`flex-1 min-w-[100px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all relative whitespace-nowrap
-                ${tab === id
-                  ? 'bg-dz-green text-white shadow-sm'
-                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
-              <Icon size={15} />
-              <span>{label}</span>
-              {badge != null && badge > 0 && tab !== id && (
-                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-dz-red text-white text-[9px] font-bold rounded-full flex items-center justify-center px-1">
-                  {badge}
-                </span>
+            <button key={id} onClick={() => setTab(id as Tab)}
+              className={`relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${
+                tab === id ? 'bg-dz-green text-white shadow-sm' : 'text-muted-foreground hover:bg-muted'
+              }`}>
+              <Icon size={15}/>
+              <span className="hidden sm:inline">{label}</span>
+              {badge != null && badge > 0 && (
+                <span className={`text-[10px] font-black min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1 ${
+                  tab === id ? 'bg-white text-dz-green' : 'bg-dz-red text-white'
+                }`}>{badge}</span>
               )}
             </button>
           ))}
         </div>
 
-        {/* ══ OVERVIEW ══════════════════════════════ */}
+        {/* ══ OVERVIEW ══════════════════════════════════════════════════════ */}
         {tab === 'overview' && (
-          <div className="space-y-5">
-
-            {/* KPI cards */}
+          <div className="space-y-4">
+            {/* Stats grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
-                { icon: Package,    val: active.length,           label: 'Annonces actives',  trend: '+2 ce mois',  up: true,  color: 'text-dz-green',  bg: 'bg-dz-green/8'   },
-                { icon: Eye,        val: totalViews.toLocaleString(), label: 'Vues totales',   trend: '+18% vs mois dernier', up: true,  color: 'text-blue-600',  bg: 'bg-blue-500/8'   },
-                { icon: MessageSquare, val: unread,               label: 'Msgs non lus',      trend: unread > 0 ? 'À traiter' : 'Tout lu', up: false, color: 'text-amber-600', bg: 'bg-amber-500/8'  },
-                { icon: Heart,      val: favorites.length,        label: 'Favoris sauvés',    trend: 'annonces suivies', up: true, color: 'text-dz-red',   bg: 'bg-dz-red/8'    },
-              ].map((k, i) => (
-                <div key={i} className={`${k.bg} rounded-2xl p-4 border border-border/40 bg-card`}>
-                  <div className="flex justify-between items-start mb-3">
-                    <k.icon size={18} className={k.color} />
-                    <span className={`text-[10px] font-semibold flex items-center gap-0.5 ${k.up ? 'text-dz-green' : 'text-amber-600'}`}>
-                      {k.up ? <ArrowUpRight size={10}/> : <ArrowDownRight size={10}/>}
-                      {k.trend}
-                    </span>
-                  </div>
-                  <div className={`text-2xl font-black ${k.color} leading-none mb-1`}>{k.val}</div>
-                  <div className="text-xs text-muted-foreground font-medium">{k.label}</div>
+                { label:'Annonces actives', value:myAds.filter(l=>l.status==='active').length, Icon:Package,      color:'text-dz-green', bg:'bg-dz-green/10' },
+                { label:'Vues totales',      value:totalViews.toLocaleString(),               Icon:Eye,           color:'text-blue-600',  bg:'bg-blue-50 dark:bg-blue-950/30' },
+                { label:'Messages non lus',  value:unread,                                   Icon:MessageSquare, color:'text-amber-600', bg:'bg-amber-50 dark:bg-amber-950/30' },
+                { label:'Favoris reçus',     value:favCount,                                  Icon:Heart,         color:'text-dz-red',    bg:'bg-dz-red/10' },
+              ].map(k => (
+                <div key={k.label} className={`${k.bg} border border-border rounded-2xl p-4`}>
+                  <k.Icon size={18} className={k.color + ' mb-2'}/>
+                  <p className={`text-2xl font-black ${k.color}`}>{k.value}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{k.label}</p>
                 </div>
               ))}
             </div>
 
-            {/* Chart + Trust */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-              {/* Weekly chart */}
-              <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-5 shadow-card">
-                <div className="flex justify-between items-center mb-4">
-                  <div>
-                    <h3 className="font-black text-foreground text-sm">Vues & contacts — 7 derniers jours</h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">Vos statistiques apparaîtront ici après vos premières annonces</p>
-                  </div>
-                  <TrendingUp size={16} className="text-dz-green" />
-                </div>
-                <ResponsiveContainer width="100%" height={150}>
-                  <BarChart data={WEEK} barGap={4}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                    <XAxis dataKey="j" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-                    <Tooltip
-                      contentStyle={{ borderRadius: 12, border: '1px solid hsl(var(--border))', fontSize: 12, background: 'hsl(var(--card))' }}
-                      cursor={{ fill: 'hsl(var(--muted))' }}
-                      formatter={(val: number, name: string) => [val, name === 'vues' ? 'Vues' : 'Contacts']}
-                    />
-                    <Bar dataKey="vues" fill="var(--dz-green)" radius={[5,5,0,0]} fillOpacity={0.7} />
-                    <Bar dataKey="contacts" fill="var(--dz-red)" radius={[5,5,0,0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+            {/* Chart */}
+            <div className="bg-card border border-border rounded-2xl p-5 shadow-card">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-black text-foreground flex items-center gap-2">
+                  <BarChart2 size={16} className="text-dz-green"/> Vues — 7 derniers jours
+                </h3>
+                {totalViews === 0 && (
+                  <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
+                    Publiez une annonce pour voir les stats
+                  </span>
+                )}
               </div>
-
-              {/* Trust score */}
-              <div className="bg-foreground rounded-2xl p-5 relative overflow-hidden shadow-card">
-                <div className="absolute inset-0 opacity-[0.03]">
-                  <Shield size={200} className="absolute -right-10 -bottom-10" />
-                </div>
-                <div className="relative z-10">
-                  <p className="text-xs font-bold text-white/50 uppercase tracking-wider mb-4">Score de confiance</p>
-                  <div className="flex items-center gap-4 mb-5">
-                    <svg viewBox="0 0 80 80" className="w-20 h-20 shrink-0 -rotate-90">
-                      <circle cx="40" cy="40" r="34" strokeWidth="6" fill="none" stroke="rgba(255,255,255,.1)" />
-                      <circle cx="40" cy="40" r="34" strokeWidth="6" fill="none"
-                        stroke={trust < 40 ? '#D21034' : trust < 70 ? '#F59E0B' : '#00874A'}
-                        strokeDasharray="214" strokeDashoffset={214 - (214 * trust / 100)}
-                        strokeLinecap="round" style={{ transition: 'all 1.2s ease' }} />
-                    </svg>
-                    <div>
-                      <div className="text-3xl font-black text-white">{trust}%</div>
-                      <div className="text-xs text-white/40 mt-1">
-                        {trust < 40 ? 'Profil à compléter' : trust < 70 ? 'Profil partiel' : 'Profil de confiance'}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    {[
-                      { l: 'Email vérifié',    ok: user.isEmailVerified,    p: '+20%' },
-                      { l: 'Téléphone vérifié',ok: user.isPhoneVerified,    p: '+30%' },
-                      { l: 'Identité vérifiée',ok: user.isIdentityVerified, p: '+50%' },
-                    ].map(v => (
-                      <div key={v.l} className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          {v.ok
-                            ? <CheckCircle2 size={13} className="text-dz-green shrink-0" />
-                            : <XCircle size={13} className="text-white/30 shrink-0" />}
-                          <span className={`text-xs ${v.ok ? 'text-white/70' : 'text-white/30'}`}>{v.l}</span>
-                        </div>
-                        {!v.ok && <span className="text-[10px] font-bold text-amber-400">{v.p}</span>}
-                      </div>
-                    ))}
-                  </div>
-                  {trust < 100 && (
-                    <button onClick={() => setTab('settings')}
-                      className="w-full mt-4 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-bold rounded-xl transition-colors">
-                      Améliorer mon score →
-                    </button>
-                  )}
-                </div>
-              </div>
+              <ResponsiveContainer width="100%" height={120}>
+                <BarChart data={chartData} barSize={20}>
+                  <XAxis dataKey="j" tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false}/>
+                  <Tooltip
+                    contentStyle={{ background:'var(--card)', border:'1px solid var(--border)', borderRadius:8, fontSize:12 }}
+                    formatter={(v: any) => [v, 'Vues']}
+                  />
+                  <Bar dataKey="vues" fill="var(--dz-green)" radius={[4,4,0,0]} opacity={0.85}/>
+                </BarChart>
+              </ResponsiveContainer>
             </div>
 
-            {/* Recent ads preview */}
+            {/* Quick actions */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[
+                { label:'Déposer une annonce', Icon:Plus,    to:'/post',     color:'bg-dz-green text-white' },
+                { label:'Voir mes messages',   Icon:MessageSquare, to:'/messages', color:'bg-card border border-border text-foreground' },
+                { label:'Mes favoris',         Icon:Heart,   to:'/favorites',color:'bg-card border border-border text-foreground' },
+                { label:'Booster',             Icon:Rocket,  to:'/boost',    color:'bg-card border border-border text-foreground' },
+              ].map(a => (
+                <Link key={a.label} to={a.to}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-2xl font-bold text-sm text-center transition-all hover:-translate-y-0.5 hover:shadow-card ${a.color}`}>
+                  <a.Icon size={20}/>
+                  <span className="text-xs leading-tight">{a.label}</span>
+                </Link>
+              ))}
+            </div>
+
+            {/* Recent ads */}
             {myAds.length > 0 && (
               <div className="bg-card border border-border rounded-2xl p-5 shadow-card">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-black text-foreground text-sm">Mes annonces récentes</h3>
-                  <button onClick={() => setTab('ads')} className="text-xs font-bold text-dz-green flex items-center gap-1 hover:underline">
-                    Tout voir <ChevronRight size={13} />
-                  </button>
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="font-black text-foreground">Dernières annonces</h3>
+                  <button onClick={() => setTab('ads')} className="text-xs text-dz-green font-bold hover:underline">Tout voir →</button>
                 </div>
-                <div className="space-y-3">
-                  {myAds.slice(0, 3).map(ad => (
-                    <div key={ad.id} className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl hover:bg-muted transition-colors">
-                      <img src={ad.imageUrl} alt="" className="w-12 h-12 rounded-xl object-cover shrink-0 bg-muted" />
+                <div className="space-y-2">
+                  {myAds.slice(0,3).map(l => (
+                    <Link key={l.id} to={`/listing/${l.id}`}
+                      className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-muted transition-colors">
+                      <img src={l.imageUrl} alt="" className="w-12 h-12 rounded-xl object-cover shrink-0"/>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-foreground truncate">{ad.title}</p>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-xs font-bold text-dz-green">{ad.price.toLocaleString()} DA</span>
-                          <span className="w-1 h-1 rounded-full bg-muted-foreground/40" />
-                          <span className="text-xs text-muted-foreground flex items-center gap-1"><Eye size={10}/>{ad.views?.toLocaleString()}</span>
-                        </div>
+                        <p className="font-semibold text-sm text-foreground truncate">{l.title}</p>
+                        <p className="text-xs text-muted-foreground">{l.price.toLocaleString()} DA · {l.views||0} vues</p>
                       </div>
-                      <div className={`text-[10px] font-bold px-2 py-1 rounded-lg ${ad.status === 'active' ? 'bg-dz-green/10 text-dz-green' : 'bg-muted text-muted-foreground'}`}>
-                        {ad.status === 'active' ? '● Active' : '⏸ Pause'}
-                      </div>
-                    </div>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        l.status==='active' ? 'bg-dz-green/10 text-dz-green' :
+                        l.status==='pending' ? 'bg-amber-100 text-amber-600' : 'bg-muted text-muted-foreground'
+                      }`}>
+                        {l.status==='active'?'Actif':l.status==='pending'?'En attente':'Inactif'}
+                      </span>
+                    </Link>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Quick actions */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {[
-                { label:'Déposer annonce', Icon:Plus,           to:'/post',      color:'bg-dz-green text-white shadow-brand-sm' },
-                { label:'Voir favoris',    Icon:Heart,          to:'/favorites', color:'bg-card border border-border text-foreground' },
-                { label:'Messagerie',      Icon:MessageSquare,  to:'/messages',  color:'bg-card border border-border text-foreground', badge: unread },
-                { label:'Mes stats',       Icon:BarChart2,      action:()=>setTab('stats'), color:'bg-card border border-border text-foreground' },
-              ].map((item, i) => (
-                item.to ? (
-                  <Link key={i} to={item.to}
-                    className={`relative flex items-center gap-2.5 p-4 rounded-2xl font-semibold text-sm transition-all hover:-translate-y-0.5 ${item.color}`}>
-                    <item.Icon size={18} />
-                    {item.label}
-                    {item.badge != null && item.badge > 0 && (
-                      <span className="absolute -top-1 -right-1 w-5 h-5 bg-dz-red text-white text-[9px] font-bold rounded-full flex items-center justify-center">{item.badge}</span>
-                    )}
-                  </Link>
-                ) : (
-                  <button key={i} onClick={item.action}
-                    className={`flex items-center gap-2.5 p-4 rounded-2xl font-semibold text-sm transition-all hover:-translate-y-0.5 text-left ${item.color}`}>
-                    <item.Icon size={18} />
-                    {item.label}
-                  </button>
-                )
-              ))}
+            {/* Trust score card */}
+            <div className="bg-card border border-border rounded-2xl p-5 shadow-card">
+              <h3 className="font-black text-foreground mb-4 flex items-center gap-2">
+                <Shield size={16} className="text-dz-green"/> Score de confiance
+              </h3>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="relative w-20 h-20">
+                  <svg viewBox="0 0 36 36" className="w-20 h-20 -rotate-90">
+                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--muted)" strokeWidth="3"/>
+                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="#006233" strokeWidth="3"
+                      strokeDasharray={`${trust} ${100-trust}`} strokeLinecap="round"/>
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className={`text-lg font-black ${trustColor}`}>{trust}%</span>
+                  </div>
+                </div>
+                <div className="flex-1 space-y-2">
+                  {[
+                    { label:'Email vérifié',    done:user.isEmailVerified,    points:'+20%' },
+                    { label:'Téléphone vérifié',done:user.isPhoneVerified,    points:'+30%' },
+                    { label:'Identité vérifiée',done:user.isIdentityVerified, points:'+50%' },
+                  ].map(item => (
+                    <div key={item.label} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {item.done
+                          ? <CheckCircle2 size={14} className="text-dz-green"/>
+                          : <div className="w-3.5 h-3.5 rounded-full border-2 border-muted-foreground/30"/>
+                        }
+                        <span className="text-xs text-foreground">{item.label}</span>
+                      </div>
+                      <span className={`text-[10px] font-bold ${item.done ? 'text-dz-green' : 'text-muted-foreground'}`}>
+                        {item.done ? '✓' : item.points}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         )}
 
-        {/* ══ MY ADS ════════════════════════════════ */}
+        {/* ══ MES ANNONCES ══════════════════════════════════════════════════ */}
         {tab === 'ads' && (
           <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="font-black text-foreground">{myAds.length} annonce{myAds.length !== 1 ? 's' : ''}</h3>
-                <p className="text-xs text-muted-foreground">{active.length} active · {paused.length} en pause</p>
-              </div>
-              <Link to="/post" className="flex items-center gap-1.5 bg-dz-green hover:bg-dz-green2 text-white text-sm font-bold px-4 py-2.5 rounded-xl shadow-brand-sm transition-colors">
-                <Plus size={15} strokeWidth={3} /> Déposer
+            <div className="flex items-center justify-between">
+              <h2 className="font-black text-foreground">{myAds.length} annonce{myAds.length!==1?'s':''}</h2>
+              <Link to="/post" className="flex items-center gap-1.5 px-4 py-2.5 bg-dz-green text-white font-bold text-sm rounded-xl shadow-brand-sm hover:bg-dz-green2 transition-all">
+                <Plus size={14}/> Nouvelle
               </Link>
             </div>
 
             {myAds.length === 0 ? (
-              <div className="bg-card border-2 border-dashed border-border rounded-3xl p-12 text-center">
-                <Package size={36} className="text-muted-foreground/40 mx-auto mb-4" />
-                <h3 className="font-black text-foreground text-lg mb-2">Aucune annonce pour l'instant</h3>
-                <p className="text-muted-foreground text-sm mb-6 max-w-xs mx-auto">Déposez votre première annonce gratuitement et touchez des milliers d'acheteurs en Algérie.</p>
-                <Link to="/post" className="inline-flex items-center gap-2 bg-dz-green text-white font-bold px-6 py-3 rounded-xl shadow-brand-md">
-                  <Plus size={16} strokeWidth={3} /> Déposer gratuitement
+              <div className="bg-card border border-dashed border-border rounded-2xl p-12 text-center">
+                <Package size={40} className="text-muted-foreground/30 mx-auto mb-4"/>
+                <h3 className="font-bold text-foreground mb-2">Aucune annonce</h3>
+                <p className="text-sm text-muted-foreground mb-5">Déposez votre première annonce gratuitement.</p>
+                <Link to="/post" className="inline-flex items-center gap-2 px-6 py-3 bg-dz-green text-white font-bold rounded-xl shadow-brand-sm hover:bg-dz-green2 transition-colors">
+                  <Plus size={16}/> Déposer une annonce
                 </Link>
               </div>
             ) : (
               <div className="space-y-3">
                 {myAds.map(ad => (
-                  <div key={ad.id}
-                    className={`bg-card border border-border rounded-2xl overflow-hidden transition-all hover:shadow-card ${ad.status === 'paused' ? 'opacity-60' : ''}`}>
-                    <div className="flex gap-4 p-4">
-                      <img src={ad.imageUrl} alt="" className="w-20 h-16 sm:w-28 sm:h-20 rounded-xl object-cover shrink-0 bg-muted" />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex justify-between gap-2 mb-1">
-                          <h4 className="font-bold text-sm text-foreground truncate leading-tight">{ad.title}</h4>
-                          <span className="font-black text-sm text-dz-green shrink-0 whitespace-nowrap">
-                            {ad.price > 0 ? `${ad.price.toLocaleString()} DA` : 'Sur demande'}
-                          </span>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mb-3">
-                          <span className={`font-bold px-2 py-0.5 rounded-full ${ad.status === 'active' ? 'bg-dz-green/10 text-dz-green' : 'bg-muted text-muted-foreground'}`}>
-                            {ad.status === 'active' ? '● Active' : '⏸ Pause'}
-                          </span>
-                          <span className="flex items-center gap-1"><Eye size={10}/> {(ad.views||0).toLocaleString()} vues</span>
-                          <span className="flex items-center gap-1"><Clock size={10}/> {ad.date}</span>
-                        </div>
-                        <div className="flex flex-wrap gap-1.5">
-                          <button className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 bg-muted hover:bg-muted-foreground/20 rounded-lg transition-colors">
-                            <Edit2 size={11}/> Modifier
-                          </button>
-                          {ad.status === 'active'
-                            ? <button onClick={() => updateListingStatus(ad.id, 'paused')}
-                                className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-lg transition-colors">
-                                <PauseCircle size={11}/> Pause
-                              </button>
-                            : <button onClick={() => updateListingStatus(ad.id, 'active')}
-                                className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 bg-dz-green/10 text-dz-green rounded-lg transition-colors">
-                                <PlayCircle size={11}/> Réactiver
-                              </button>
-                          }
-                          <button className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 bg-amber-400/10 text-amber-600 dark:text-amber-400 rounded-lg ml-auto transition-colors">
-                            <Rocket size={11}/> Booster
-                          </button>
-                          <button onClick={() => setDelModal(ad.id)}
-                            className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 bg-dz-red/10 text-dz-red rounded-lg transition-colors">
-                            <Trash2 size={11}/> Supprimer
-                          </button>
-                        </div>
+                  <div key={ad.id} className="bg-card border border-border rounded-2xl p-4 flex gap-4 shadow-card">
+                    <Link to={`/listing/${ad.id}`} className="shrink-0">
+                      <img src={ad.imageUrl} alt="" className="w-20 h-20 rounded-xl object-cover"/>
+                    </Link>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <Link to={`/listing/${ad.id}`} className="font-bold text-sm text-foreground hover:text-dz-green transition-colors line-clamp-1">
+                          {ad.title}
+                        </Link>
+                        <span className={`shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          ad.status==='active'  ? 'bg-dz-green/10 text-dz-green' :
+                          ad.status==='pending' ? 'bg-amber-100 text-amber-600' :
+                          'bg-muted text-muted-foreground'
+                        }`}>
+                          {ad.status==='active'?'Actif':ad.status==='pending'?'En attente':'Inactif'}
+                        </span>
                       </div>
+                      <p className="text-base font-black text-dz-green mt-0.5">{ad.price.toLocaleString()} DA</p>
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
+                        <span className="flex items-center gap-1"><Eye size={10}/>{ad.views||0} vues</span>
+                        <span className="flex items-center gap-1"><Clock size={10}/>{ad.date}</span>
+                        <span className="flex items-center gap-1"><MapPin size={10}/>{ad.wilayaName}</span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-1.5 shrink-0">
+                      <Link to={`/listing/${ad.id}`}
+                        className="p-2 hover:bg-muted rounded-xl transition-colors text-muted-foreground hover:text-dz-green" title="Voir">
+                        <Eye size={15}/>
+                      </Link>
+                      <Link to={`/boost?listing=${ad.id}`}
+                        className="p-2 hover:bg-amber-50 rounded-xl transition-colors text-muted-foreground hover:text-amber-600" title="Booster">
+                        <Rocket size={15}/>
+                      </Link>
+                      <button onClick={() => setDelModal(ad.id)}
+                        className="p-2 hover:bg-dz-red/10 rounded-xl transition-colors text-muted-foreground hover:text-dz-red" title="Supprimer">
+                        <Trash2 size={15}/>
+                      </button>
                     </div>
                   </div>
                 ))}
               </div>
             )}
+          </div>
+        )}
 
-            {delModal && (
-              <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-                <div className="bg-card border border-border rounded-3xl p-6 max-w-sm w-full shadow-2xl">
-                  <div className="w-14 h-14 bg-dz-red/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <AlertTriangle size={24} className="text-dz-red" />
-                  </div>
-                  <h3 className="text-lg font-black text-center mb-2">Supprimer l'annonce ?</h3>
-                  <p className="text-sm text-muted-foreground text-center mb-5 leading-relaxed">Cette action est irréversible. L'annonce sera définitivement supprimée.</p>
-                  <div className="flex gap-3">
-                    <button onClick={() => setDelModal(null)} className="flex-1 py-3 border border-border rounded-xl font-bold text-sm hover:bg-muted transition-colors">Annuler</button>
-                    <button onClick={() => { removeListing(delModal!); setDelModal(null); }} className="flex-1 py-3 bg-dz-red text-white rounded-xl font-bold text-sm hover:bg-dz-red/90 transition-colors">Supprimer</button>
-                  </div>
+        {/* ══ MESSAGES ══════════════════════════════════════════════════════ */}
+        {tab === 'messages' && (
+          <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-card">
+            {threads.length === 0 ? (
+              <div className="p-12 text-center">
+                <MessageSquare size={40} className="text-muted-foreground/20 mx-auto mb-4"/>
+                <p className="font-bold text-foreground mb-1">Aucun message</p>
+                <p className="text-sm text-muted-foreground">Vos conversations avec les vendeurs apparaîtront ici.</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-border">
+                {threads.slice(0,10).map(th => {
+                  const last = th.messages[th.messages.length-1];
+                  return (
+                    <Link key={th.id} to="/messages"
+                      className="flex items-center gap-3 px-4 py-3.5 hover:bg-muted/50 transition-colors">
+                      {th.listingImage
+                        ? <img src={th.listingImage} alt="" className="w-12 h-12 rounded-xl object-cover shrink-0"/>
+                        : <div className="w-12 h-12 bg-dz-green/10 rounded-xl flex items-center justify-center shrink-0 text-xl">🦊</div>
+                      }
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-sm text-foreground truncate">{th.listingTitle}</p>
+                        <p className="text-xs text-muted-foreground truncate">{last?.text || 'Nouvelle conversation'}</p>
+                      </div>
+                      {th.unread > 0 && (
+                        <span className="min-w-[18px] h-[18px] bg-dz-green text-white text-[10px] font-black rounded-full flex items-center justify-center px-1 shrink-0">
+                          {th.unread}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
+                <div className="p-3 text-center">
+                  <Link to="/messages" className="text-sm font-bold text-dz-green hover:underline">
+                    Voir tous les messages →
+                  </Link>
                 </div>
               </div>
             )}
           </div>
         )}
 
-        {/* ══ STATS ══════════════════════════════════ */}
-        {tab === 'stats' && (
-          <div className="space-y-5">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {[
-                { label: 'Vues totales', val: totalViews.toLocaleString(), sub: 'toutes annonces confondues', Icon: Eye,          color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-950/30' },
-                { label: 'Contacts reçus', val: myAds.reduce((s,l)=>s+(l.contacts||0),0).toString(), sub: 'acheteurs intéressés', Icon: Users, color: 'text-dz-green', bg: 'bg-dz-green/5'  },
-                { label: 'Taux de réponse', val: '94%', sub: 'délai moyen: 45 min', Icon: Star, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-950/30' },
-              ].map(k => (
-                <div key={k.label} className={`${k.bg} border border-border rounded-2xl p-5`}>
-                  <k.Icon size={20} className={k.color + ' mb-3'} />
-                  <div className={`text-3xl font-black ${k.color} mb-1`}>{k.val}</div>
-                  <div className="text-sm font-bold text-foreground mb-0.5">{k.label}</div>
-                  <div className="text-xs text-muted-foreground">{k.sub}</div>
-                </div>
-              ))}
-            </div>
-
-            <div className="bg-card border border-border rounded-2xl p-5 shadow-card">
-              <h3 className="font-black text-foreground text-sm mb-4">Évolution des vues — 7 jours</h3>
-              <ResponsiveContainer width="100%" height={180}>
-                <LineChart data={WEEK}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                  <XAxis dataKey="j" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid hsl(var(--border))', fontSize: 12, background: 'hsl(var(--card))' }} />
-                  <Line type="monotone" dataKey="vues" stroke="var(--dz-green)" strokeWidth={2.5} dot={{ fill: 'var(--dz-green)', r: 4 }} activeDot={{ r: 6 }} />
-                  <Line type="monotone" dataKey="contacts" stroke="var(--dz-red)" strokeWidth={2} dot={{ fill: 'var(--dz-red)', r: 3 }} activeDot={{ r: 5 }} />
-                </LineChart>
-              </ResponsiveContainer>
-              <div className="flex items-center gap-4 mt-3 justify-center text-xs text-muted-foreground">
-                <span className="flex items-center gap-1.5"><span className="w-3 h-0.5 bg-dz-green rounded inline-block"/> Vues</span>
-                <span className="flex items-center gap-1.5"><span className="w-3 h-0.5 bg-dz-red rounded inline-block"/> Contacts</span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ══ SETTINGS ═══════════════════════════════ */}
+        {/* ══ SETTINGS ══════════════════════════════════════════════════════ */}
         {tab === 'settings' && (
-          <div className="space-y-4 max-w-lg">
-            <div className="bg-card border border-border rounded-2xl p-6 shadow-card space-y-4">
-              <h3 className="font-black text-foreground flex items-center gap-2"><Settings size={16}/> Informations personnelles</h3>
-              {[
-                { label:'Nom complet', value:user.name,        type:'text'  },
-                { label:'Email',       value:user.email,       type:'email' },
-                { label:'Téléphone',   value:user.phone||'',   type:'tel'   },
-              ].map(f => (
-                <div key={f.label}>
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide block mb-1.5">{f.label}</label>
-                  <input defaultValue={f.value} type={f.type}
-                    className="w-full bg-muted border border-border rounded-xl px-4 py-3 text-sm outline-none focus:border-dz-green transition-all" />
-                </div>
-              ))}
-              <button className="px-6 py-2.5 bg-dz-green text-white font-bold rounded-xl text-sm shadow-brand-sm hover:bg-dz-green2 transition-colors">
-                Enregistrer
-              </button>
-            </div>
-
-            <div className="bg-card border border-border rounded-2xl p-6 shadow-card">
-              <h3 className="font-black text-foreground flex items-center gap-2 mb-4"><Shield size={16} className="text-dz-green"/> Sécurité & Vérification</h3>
+          <div className="space-y-4">
+            {/* Profile info */}
+            <div className="bg-card border border-border rounded-2xl p-5 shadow-card">
+              <h3 className="font-black text-foreground mb-4 flex items-center gap-2">
+                <User size={16}/> Informations personnelles
+              </h3>
               <div className="space-y-3">
                 {[
-                  { label:'Email vérifié',     ok:user.isEmailVerified,    bonus:'+20%',  desc:'Votre email est confirmé'         },
-                  { label:'Téléphone vérifié', ok:user.isPhoneVerified,    bonus:'+30%',  desc:'Vérifiez via SMS pour plus de confiance' },
-                  { label:'Identité vérifiée', ok:user.isIdentityVerified, bonus:'+50%',  desc:'Uploadez une pièce d\'identité'   },
+                  { label:'Nom complet', value:user.name, key:'name', type:'text', placeholder:'Votre nom' },
+                  { label:'Email',       value:user.email, key:'email', type:'email', placeholder:'votre@email.com' },
+                  { label:'Téléphone',   value:user.phone, key:'phone', type:'tel', placeholder:'0550 12 34 56' },
+                ].map(f => (
+                  <div key={f.key}>
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide block mb-1">{f.label}</label>
+                    <input type={f.type} defaultValue={f.value || ''} placeholder={f.placeholder}
+                      className="w-full bg-muted border border-border rounded-xl px-4 py-2.5 text-sm outline-none focus:border-dz-green transition-all"/>
+                  </div>
+                ))}
+                <button className="w-full py-3 bg-dz-green text-white font-bold rounded-xl hover:bg-dz-green2 transition-colors mt-2">
+                  Sauvegarder
+                </button>
+              </div>
+            </div>
+
+            {/* Verification */}
+            <div className="bg-card border border-border rounded-2xl p-5 shadow-card">
+              <h3 className="font-black text-foreground mb-4 flex items-center gap-2">
+                <Shield size={16} className="text-dz-green"/> Vérification du compte
+              </h3>
+              <div className="space-y-3">
+                {[
+                  { label:'Email', done:user.isEmailVerified, action:'Vérifier l\'email', points:'+20% confiance', Icon:CheckCircle2 },
+                  { label:'Téléphone', done:user.isPhoneVerified, action:'Vérifier le téléphone', points:'+30% confiance', Icon:Phone },
+                  { label:'Identité (carte nationale)', done:user.isIdentityVerified, action:'Vérifier l\'identité', points:'+50% confiance', Icon:Shield },
                 ].map(v => (
-                  <div key={v.label}
-                    className={`flex items-center gap-3 p-4 rounded-xl ${v.ok ? 'bg-dz-green/5 border border-dz-green/15' : 'bg-muted'}`}>
-                    {v.ok
-                      ? <CheckCircle2 size={18} className="text-dz-green shrink-0" />
-                      : <XCircle size={18} className="text-muted-foreground/50 shrink-0" />}
-                    <div className="flex-1">
-                      <p className="text-sm font-semibold text-foreground">{v.label}</p>
-                      <p className="text-xs text-muted-foreground">{v.desc}</p>
-                    </div>
-                    {!v.ok && (
-                      <div className="text-right shrink-0">
-                        <div className="text-xs font-bold text-amber-600 mb-1">{v.bonus}</div>
-                        <button className="text-xs font-bold text-white bg-dz-green px-3 py-1.5 rounded-lg hover:bg-dz-green2 transition-colors">
-                          Vérifier
-                        </button>
+                  <div key={v.label} className={`flex items-center justify-between p-3.5 rounded-xl border ${
+                    v.done ? 'border-dz-green/20 bg-dz-green/5' : 'border-border bg-muted/30'
+                  }`}>
+                    <div className="flex items-center gap-3">
+                      <v.Icon size={16} className={v.done ? 'text-dz-green' : 'text-muted-foreground'}/>
+                      <div>
+                        <p className="text-sm font-semibold text-foreground">{v.label}</p>
+                        <p className="text-xs text-muted-foreground">{v.points}</p>
                       </div>
-                    )}
+                    </div>
+                    {v.done
+                      ? <span className="text-xs font-bold text-dz-green bg-dz-green/10 px-2.5 py-1 rounded-full">✓ Vérifié</span>
+                      : <button className="text-xs font-bold text-white bg-dz-green px-3 py-1.5 rounded-lg hover:bg-dz-green2 transition-colors">{v.action}</button>
+                    }
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Danger zone */}
+            <div className="bg-card border border-border rounded-2xl p-5 shadow-card">
+              <h3 className="font-black text-foreground mb-3">Compte</h3>
+              <button onClick={() => { logout(); navigate('/'); }}
+                className="w-full flex items-center justify-center gap-2 py-3 border border-dz-red/30 text-dz-red font-bold rounded-xl hover:bg-dz-red/5 transition-colors">
+                <LogOut size={16}/> Se déconnecter
+              </button>
             </div>
           </div>
         )}
       </div>
+
+      {/* ── Delete modal ── */}
+      {delModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setDelModal(null)}>
+          <div className="bg-card border border-border rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-fade-up"
+            onClick={e => e.stopPropagation()}>
+            <h3 className="font-black text-foreground mb-2">Supprimer l'annonce ?</h3>
+            <p className="text-sm text-muted-foreground mb-5">Cette action est irréversible. L'annonce sera définitivement supprimée.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setDelModal(null)}
+                className="flex-1 py-3 border border-border text-foreground font-bold rounded-xl hover:bg-muted transition-colors">
+                Annuler
+              </button>
+              <button onClick={() => { removeListing(delModal); setDelModal(null); }}
+                className="flex-1 py-3 bg-dz-red text-white font-bold rounded-xl hover:bg-dz-red/90 transition-colors">
+                Supprimer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
