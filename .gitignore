@@ -42,3 +42,4 @@ coverage/
 /src/assets/generate_dza.py
 /gen_paths.cjs
 /gen_paths.mjs
+.vercel
