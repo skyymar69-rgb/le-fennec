@@ -1,8 +1,8 @@
-import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ZoomIn, ZoomOut, Maximize2, MapPin } from 'lucide-react';
+import React, { useState, useRef, useCallback, useMemo } from 'react';
+import { ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { WILAYA_PATHS } from '../../data/wilayaPaths';
+import { WILAYAS } from '../../data/wilayas';
+import { ALGERIA_SVG_PATHS, ALGERIA_SVG_VIEWBOX } from '../../data/algeriaSvgPaths';
 
 interface Props {
   onSelectWilaya?: (code: string, name: string) => void;
@@ -12,293 +12,169 @@ interface Props {
   listingCounts?:   Record<string, number>;
 }
 
-// Preset views (in SVG coordinates 0-1000)
-const VIEWS = {
-  full:  { x: 0,    y: 0,   scale: 1 },
-  north: { x: 250,  y: 0,   scale: 2.2 },  // zoom on coastal north
-  east:  { x: 550,  y: 0,   scale: 2.2 },  // east: Constantine, Annaba
-  west:  { x: 100,  y: 30,  scale: 2.2 },  // west: Oran, Tlemcen
-};
+// Dimensions du viewBox de la carte source (algeria-interractive-map)
+const VB_W = 286.086;
+const VB_H = 298.332;
 
-const NORTHERN_WILAYAS = new Set([
-  '01','02','03','04','05','06','07','08','09','10','11','12','13','14','15','16',
-  '17','18','19','20','21','22','23','24','25','26','27','28','29','31','32','34',
-  '35','36','38','40','41','42','43','44','45','46','48',
-]);
+// Couleurs — fond de carte vert Algérie
+const BG_GREEN       = '#006233';  // vert du drapeau algérien (fond)
+const HOVER_GREEN    = '#00E070';
+const SELECTED_GOLD  = '#FFD700';
+
+const NAME_BY_CODE: Record<string, { fr: string; ar: string; en: string }> = {};
+WILAYAS.forEach(w => { NAME_BY_CODE[w.code] = { fr: w.nameFr, ar: w.nameAr, en: w.nameEn }; });
 
 const AlgeriaMap: React.FC<Props> = ({
   onSelectWilaya, selectedWilaya, className = '', compact = false, listingCounts,
 }) => {
-  const [scale,     setScale]     = useState(2.2);      // default: zoomed north
-  const [panX,      setPanX]      = useState(-250);     // default: centered on north
-  const [panY,      setPanY]      = useState(0);
-  const [hovered,   setHovered]   = useState<string | null>(null);
-  const [isDragging,setIsDragging]= useState(false);
-  const [view,      setView]      = useState<'north'|'west'|'east'|'full'>('north');
-
-  const svgRef   = useRef<SVGSVGElement>(null);
-  const dragStart= useRef<{x:number;y:number;px:number;py:number} | null>(null);
-  const navigate = useNavigate();
+  const [hovered, setHovered] = useState<string | null>(null);
+  const [tooltip, setTooltip] = useState<{ x: number; y: number } | null>(null);
+  const [scale,   setScale]   = useState(1);
+  const [pan,     setPan]     = useState({ x: 0, y: 0 });
+  const dragRef = useRef<{ x: number; y: number; px: number; py: number; moved: boolean } | null>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
   const { language } = useLanguage();
 
-  const getName = useCallback((code: string) => {
-    const w = WILAYA_PATHS[code];
-    if (!w) return code;
-    return language === 'ar' ? w.nameAr : language === 'en' ? w.nameEn : w.nameFr;
+  const getName = useCallback((code: string, fallback: string) => {
+    const n = NAME_BY_CODE[code];
+    if (!n) return fallback;
+    return language === 'ar' ? n.ar : language === 'en' ? n.en : n.fr;
   }, [language]);
 
   const maxCount = useMemo(() =>
     listingCounts ? Math.max(1, ...Object.values(listingCounts)) : 1,
   [listingCounts]);
 
-  const getColor = useCallback((code: string) => {
-    if (selectedWilaya === code) return '#D21034';
-    if (hovered === code)        return '#00C060';
-    if (listingCounts) {
-      const ratio = (listingCounts[code] || 0) / maxCount;
-      const l = Math.round(55 - ratio * 30);
-      return `hsl(150, 65%, ${l}%)`;
-    }
-    return NORTHERN_WILAYAS.has(code) ? '#006233' : '#4CAF50';
+  // Remplissage des wilayas : dégradé de verts (clair = plus d'annonces) sur fond vert Algérie
+  const getFill = useCallback((code: string) => {
+    if (selectedWilaya === code) return SELECTED_GOLD;
+    if (hovered === code)        return HOVER_GREEN;
+    const ratio = listingCounts ? (listingCounts[code] || 0) / maxCount : 0;
+    // hsl(150) : de 28% (peu d'annonces) à 46% (beaucoup) — lisible sur #006233
+    return `hsl(150, 62%, ${Math.round(28 + ratio * 18)}%)`;
   }, [hovered, selectedWilaya, listingCounts, maxCount]);
 
-  // ── Zoom controls ─────────────────────────────────────────────────────
-  const zoom = (factor: number) => {
-    setScale(s => Math.max(1, Math.min(8, s * factor)));
+  // ── Zoom / pan ──────────────────────────────────────────────────────────
+  const clampPan = (p: { x: number; y: number }, s: number) => ({
+    x: Math.max(-VB_W * (s - 1), Math.min(0, p.x)),
+    y: Math.max(-VB_H * (s - 1), Math.min(0, p.y)),
+  });
+
+  const zoomBy = (f: number) => {
+    setScale(s => {
+      const ns = Math.max(1, Math.min(6, s * f));
+      setPan(p => clampPan(p, ns));
+      return ns;
+    });
   };
 
-  const applyView = (v: typeof view) => {
-    setView(v);
-    const preset = VIEWS[v];
-    setScale(preset.scale);
-    setPanX(-preset.x * preset.scale);
-    setPanY(-preset.y * preset.scale);
-  };
+  const reset = () => { setScale(1); setPan({ x: 0, y: 0 }); };
 
-  // ── Mouse wheel zoom ──────────────────────────────────────────────────
-  const onWheel = useCallback((e: React.WheelEvent) => {
+  const onWheel = (e: React.WheelEvent) => {
     e.preventDefault();
-    const factor = e.deltaY > 0 ? 0.85 : 1.18;
-    setScale(s => Math.max(1, Math.min(8, s * factor)));
-  }, []);
-
-  // ── Pan (drag) ────────────────────────────────────────────────────────
-  const onMouseDown = (e: React.MouseEvent) => {
-    dragStart.current = { x: e.clientX, y: e.clientY, px: panX, py: panY };
-    setIsDragging(false);
+    zoomBy(e.deltaY < 0 ? 1.2 : 1 / 1.2);
   };
-  const onMouseMove = (e: React.MouseEvent) => {
-    if (!dragStart.current) return;
-    const dx = e.clientX - dragStart.current.x;
-    const dy = e.clientY - dragStart.current.y;
-    if (Math.abs(dx) + Math.abs(dy) > 3) setIsDragging(true);
-    setPanX(dragStart.current.px + dx);
-    setPanY(dragStart.current.py + dy);
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    (e.target as Element).setPointerCapture?.(e.pointerId);
+    dragRef.current = { x: e.clientX, y: e.clientY, px: pan.x, py: pan.y, moved: false };
   };
-  const onMouseUp = () => { dragStart.current = null; };
 
-  // ── Touch (mobile pinch + pan) ────────────────────────────────────────
-  const lastTouch = useRef<{x:number;y:number;dist:number} | null>(null);
+  const onPointerMove = (e: React.PointerEvent) => {
+    // Tooltip qui suit le curseur
+    const rect = wrapRef.current?.getBoundingClientRect();
+    if (rect) setTooltip({ x: e.clientX - rect.left, y: e.clientY - rect.top });
 
-  const onTouchStart = (e: React.TouchEvent) => {
-    if (e.touches.length === 1) {
-      lastTouch.current = { x: e.touches[0].clientX, y: e.touches[0].clientY, dist: 0 };
-    } else if (e.touches.length === 2) {
-      const dx = e.touches[0].clientX - e.touches[1].clientX;
-      const dy = e.touches[0].clientY - e.touches[1].clientY;
-      lastTouch.current = { x: 0, y: 0, dist: Math.sqrt(dx*dx + dy*dy) };
+    if (!dragRef.current) return;
+    const dx = e.clientX - dragRef.current.x;
+    const dy = e.clientY - dragRef.current.y;
+    if (Math.abs(dx) + Math.abs(dy) > 4) dragRef.current.moved = true;
+    if (scale > 1 && rect) {
+      const k = VB_W / rect.width / scale;
+      setPan(clampPan({ x: dragRef.current.px + dx * k * scale, y: dragRef.current.py + dy * k * scale }, scale));
     }
   };
 
-  const onTouchMove = (e: React.TouchEvent) => {
-    e.preventDefault();
-    if (!lastTouch.current) return;
-    if (e.touches.length === 1) {
-      const dx = e.touches[0].clientX - lastTouch.current.x;
-      const dy = e.touches[0].clientY - lastTouch.current.y;
-      setPanX(p => p + dx);
-      setPanY(p => p + dy);
-      lastTouch.current = { x: e.touches[0].clientX, y: e.touches[0].clientY, dist: 0 };
-    } else if (e.touches.length === 2 && lastTouch.current.dist > 0) {
-      const dx = e.touches[0].clientX - e.touches[1].clientX;
-      const dy = e.touches[0].clientY - e.touches[1].clientY;
-      const dist = Math.sqrt(dx*dx + dy*dy);
-      const factor = dist / lastTouch.current.dist;
-      setScale(s => Math.max(1, Math.min(8, s * factor)));
-      lastTouch.current.dist = dist;
-    }
+  const onPointerUp = () => { setTimeout(() => { dragRef.current = null; }, 0); };
+
+  const handleClick = (code: string, name: string) => {
+    if (dragRef.current?.moved) return; // c'était un drag, pas un clic
+    onSelectWilaya?.(code, name);
   };
 
-  // ── Click on wilaya ───────────────────────────────────────────────────
-  const handleClick = (code: string) => {
-    if (isDragging) return;
-    if (onSelectWilaya) onSelectWilaya(code, getName(code));
-    else navigate(`/search?wilaya=${code}`);
-  };
-
-  const entries = useMemo(() => Object.entries(WILAYA_PATHS), []);
-
-  // SVG transform: scale around origin then translate
-  const transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+  const hoveredData = hovered ? ALGERIA_SVG_PATHS.find(w => w.code === hovered) : null;
 
   return (
-    <div className={`flex flex-col gap-0 ${className}`}>
-      {/* ── Controls ── */}
-      <div className="flex items-center justify-between px-2 py-1.5 bg-card/80 border-b border-border rounded-t-xl">
-        {/* Region presets */}
-        <div className="flex gap-1">
-          {[
-            { id:'north', label:'Nord' },
-            { id:'west',  label:'Ouest' },
-            { id:'east',  label:'Est' },
-            { id:'full',  label:'Tout' },
-          ].map(({ id, label }) => (
-            <button key={id}
-              onClick={() => applyView(id as typeof view)}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
-                view === id
-                  ? 'bg-dz-green text-white'
-                  : 'bg-muted text-muted-foreground hover:bg-dz-green/10 hover:text-dz-green'
-              }`}>
-              {label}
-            </button>
-          ))}
-        </div>
+    <div ref={wrapRef} className={`relative select-none ${className}`}>
+      <svg
+        viewBox={ALGERIA_SVG_VIEWBOX}
+        className="w-full h-auto rounded-2xl"
+        style={{ background: `radial-gradient(120% 120% at 30% 15%, #0a7a43 0%, ${BG_GREEN} 55%, #004a26 100%)`, touchAction: 'none', cursor: scale > 1 ? 'grab' : 'pointer' }}
+        onWheel={onWheel}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerLeave={() => { setHovered(null); setTooltip(null); dragRef.current = null; }}
+        role="img"
+        aria-label="Carte interactive de l'Algérie — 48 wilayas"
+      >
+        <g transform={`translate(${pan.x} ${pan.y}) scale(${scale})`}>
+          {ALGERIA_SVG_PATHS.map(w => {
+            const name = getName(w.code, w.name);
+            return (
+              <path
+                key={w.code}
+                d={w.d}
+                fill={getFill(w.code)}
+                stroke="#ffffff"
+                strokeWidth={0.4 / scale}
+                strokeLinejoin="round"
+                style={{ transition: 'fill 0.15s ease' }}
+                onPointerEnter={() => setHovered(w.code)}
+                onClick={() => handleClick(w.code, name)}
+                role="button"
+                aria-label={`${w.code} — ${name}`}
+              >
+                <title>{`${w.code} — ${name}`}</title>
+              </path>
+            );
+          })}
+        </g>
+      </svg>
 
-        {/* Zoom buttons */}
-        <div className="flex items-center gap-1">
-          <button onClick={() => zoom(1.3)}
-            className="w-7 h-7 rounded-lg bg-muted hover:bg-dz-green/10 hover:text-dz-green flex items-center justify-center text-muted-foreground transition-all"
-            aria-label="Zoom avant">
+      {/* Contrôles zoom */}
+      {!compact && (
+        <div className="absolute top-2 right-2 flex flex-col gap-1">
+          <button onClick={() => zoomBy(1.4)} aria-label="Zoomer"
+            className="w-7 h-7 rounded-lg bg-white/90 hover:bg-white text-dz-green shadow flex items-center justify-center">
             <ZoomIn size={14}/>
           </button>
-          <span className="text-[10px] text-muted-foreground w-8 text-center font-mono">
-            {Math.round(scale * 100)}%
-          </span>
-          <button onClick={() => zoom(0.77)}
-            className="w-7 h-7 rounded-lg bg-muted hover:bg-dz-green/10 hover:text-dz-green flex items-center justify-center text-muted-foreground transition-all"
-            aria-label="Zoom arrière">
+          <button onClick={() => zoomBy(1 / 1.4)} aria-label="Dézoomer"
+            className="w-7 h-7 rounded-lg bg-white/90 hover:bg-white text-dz-green shadow flex items-center justify-center">
             <ZoomOut size={14}/>
           </button>
-          <button onClick={() => applyView('north')}
-            className="w-7 h-7 rounded-lg bg-muted hover:bg-dz-green/10 hover:text-dz-green flex items-center justify-center text-muted-foreground transition-all ml-0.5"
-            aria-label="Réinitialiser la vue" title="Réinitialiser">
-            <Maximize2 size={12}/>
+          <button onClick={reset} aria-label="Vue complète"
+            className="w-7 h-7 rounded-lg bg-white/90 hover:bg-white text-dz-green shadow flex items-center justify-center">
+            <Maximize2 size={14}/>
           </button>
         </div>
-      </div>
+      )}
 
-      {/* ── Map SVG ── */}
-      <div className="relative overflow-hidden rounded-b-xl bg-[#004d26]"
-        style={{ cursor: isDragging ? 'grabbing' : 'grab' }}>
-
-        <svg
-          ref={svgRef}
-          viewBox="0 0 1000 1000"
-          className="w-full"
+      {/* Tooltip */}
+      {hoveredData && tooltip && (
+        <div
+          className="absolute z-10 pointer-events-none px-2.5 py-1.5 rounded-lg bg-black/85 text-white text-xs shadow-lg whitespace-nowrap"
           style={{
-            aspectRatio: compact ? '1/0.7' : '1/0.8',
-            userSelect: 'none',
-            WebkitUserSelect: 'none',
+            left: Math.min(tooltip.x + 12, (wrapRef.current?.clientWidth ?? 300) - 130),
+            top:  Math.max(tooltip.y - 38, 4),
           }}
-          onWheel={onWheel}
-          onMouseDown={onMouseDown}
-          onMouseMove={onMouseMove}
-          onMouseUp={onMouseUp}
-          onMouseLeave={onMouseUp}
-          onTouchStart={onTouchStart}
-          onTouchMove={onTouchMove}
-          onTouchEnd={() => { lastTouch.current = null; }}
         >
-          <defs>
-            <filter id="glow">
-              <feDropShadow dx="0" dy="0" stdDeviation="3" floodColor="#00FF88" floodOpacity="0.5"/>
-            </filter>
-            <filter id="shadow">
-              <feDropShadow dx="1" dy="2" stdDeviation="2" floodColor="rgba(0,0,0,0.3)"/>
-            </filter>
-          </defs>
-
-          {/* Sea label */}
-          <text x="500" y="20" textAnchor="middle" fontSize="18"
-            fontFamily="Inter,sans-serif" fontWeight="600" letterSpacing="4"
-            fill="rgba(126,200,227,0.7)">
-            {language === 'ar' ? 'البحر الأبيض المتوسط' : 'MÉDITERRANÉE'}
-          </text>
-
-          {/* All wilaya paths — transformed together */}
-          <g style={{ transform, transformOrigin: '0 0', transition: isDragging ? 'none' : 'transform 0.4s ease' }}>
-            {entries.map(([code, data]) => {
-              if (!data.path) return null;
-              const isSelected = selectedWilaya === code;
-              const isHovered  = hovered === code;
-              return (
-                <g key={code}
-                  onClick={() => handleClick(code)}
-                  onMouseEnter={() => setHovered(code)}
-                  onMouseLeave={() => setHovered(null)}
-                  style={{ cursor: isDragging ? 'grabbing' : 'pointer' }}
-                >
-                  <path
-                    d={data.path}
-                    fill={getColor(code)}
-                    stroke={isSelected ? '#fff' : isHovered ? '#fff' : 'rgba(255,255,255,0.5)'}
-                    strokeWidth={isSelected ? 3/scale : isHovered ? 2/scale : 0.8/scale}
-                    opacity={isSelected || isHovered ? 1 : 0.82}
-                    filter={isSelected ? 'url(#glow)' : isHovered ? 'url(#shadow)' : undefined}
-                    style={{ transition: 'fill 0.12s, opacity 0.12s' }}
-                  />
-                  {/* Show label when zoomed enough or selected/hovered */}
-                  {(isSelected || isHovered || scale >= 3) && data.cx > 0 && data.cy > 0 && (
-                    <text
-                      x={data.cx} y={data.cy + 4}
-                      textAnchor="middle"
-                      fontSize={Math.max(7, 14 / scale)}
-                      fontWeight={isSelected || isHovered ? 700 : 600}
-                      fontFamily="Inter,sans-serif"
-                      fill="rgba(255,255,255,0.95)"
-                      style={{ pointerEvents: 'none', transition: 'font-size 0.2s' }}
-                    >
-                      {scale >= 4 ? getName(code) : code.replace('DZ','')}
-                    </text>
-                  )}
-                </g>
-              );
-            })}
-          </g>
-        </svg>
-
-        {/* ── Hovered tooltip ── */}
-        {hovered && (
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 pointer-events-none z-10 animate-fade-up">
-            <div className="bg-card/95 backdrop-blur border border-border px-3 py-1.5 rounded-full text-xs font-bold shadow-lg whitespace-nowrap flex items-center gap-1.5">
-              <MapPin size={11} className="text-dz-green"/>
-              <span>{getName(hovered)}</span>
-              {listingCounts?.[hovered] != null && (
-                <span className="text-dz-green font-black ml-1">
-                  {listingCounts[hovered]} ann.
-                </span>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* ── Mini compass / legend ── */}
-        <div className="absolute top-2 right-2 text-[9px] text-white/40 font-mono select-none">
-          🖱 glisser · 🔄 molette
-        </div>
-      </div>
-
-      {/* ── Density legend ── */}
-      {listingCounts && (
-        <div className="flex items-center justify-center gap-2 mt-1.5 text-[10px] text-muted-foreground">
-          <span>Peu d'annonces</span>
-          <div className="flex gap-0.5">
-            {[55,45,35,25,15].map(l => (
-              <div key={l} className="w-5 h-2 rounded-sm" style={{ background:`hsl(150,65%,${l}%)` }}/>
-            ))}
-          </div>
-          <span>Beaucoup</span>
+          <span className="font-bold">{hoveredData.code} — {getName(hoveredData.code, hoveredData.name)}</span>
+          {listingCounts && (
+            <span className="block text-white/70">
+              {(listingCounts[hoveredData.code] || 0).toLocaleString()} annonces
+            </span>
+          )}
         </div>
       )}
     </div>
