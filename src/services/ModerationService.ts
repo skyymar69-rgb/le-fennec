@@ -586,14 +586,17 @@ export async function moderateText(
 
   // Pass 2 : Analyse Claude si pas de flag critique
   if (!API_KEY) {
-    // Sans clé API : appliquer la décision des patterns uniquement
-    const confidence = scan.flags.length === 0 ? 0.80 : 0.60;
+    // Sans clé API : décision par patterns uniquement. Une annonce sans aucun
+    // flag doit être publiée (0.80 = manual_review permanente sans modérateur).
+    const confidence = scan.flags.length === 0 ? 0.90 : 0.60;
     const result = buildDecision(scan.flags, confidence);
     updateMetrics(result);
     return result;
   }
 
-  const fallback: ModerationResult = buildDecision(scan.flags, scan.flags.length ? 0.60 : 0.80);
+  // Sans IA disponible : une annonce sans aucun flag est publiée directement
+  // (0.80 la classait en manual_review permanente alors qu'aucun humain ne valide).
+  const fallback: ModerationResult = buildDecision(scan.flags, scan.flags.length ? 0.60 : 0.90);
 
   try {
     const aiText = await callClaudeModeration(

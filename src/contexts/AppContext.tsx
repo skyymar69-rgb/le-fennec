@@ -83,22 +83,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isLoading,    setIsLoading]    = useState(false);
   const realtimeRef = useRef<any>(null);
 
-  // All listings: Supabase DB first, then catalog, then user's local
-  const listings = dbListings.length > 0
-    ? [...dbListings, ...userListings.filter(l => !dbListings.find(d => d.id === l.id))]
-    : [...ALL_LISTINGS, ...userListings];
+  // All listings: Supabase DB first, then catalog, then user's local.
+  // Dedupe by id AND by (title, price) so stale localStorage copies never double a DB row.
+  const listings = React.useMemo(() => {
+    if (dbListings.length === 0) return [...ALL_LISTINGS, ...userListings];
+    const seen = new Set<string>();
+    dbListings.forEach(d => { seen.add(d.id); seen.add(`${d.title}|${d.price}`); });
+    return [
+      ...dbListings,
+      ...userListings.filter(l => !seen.has(l.id) && !seen.has(`${l.title}|${l.price}`)),
+    ];
+  }, [dbListings, userListings]);
 
   // ── Supabase auth listener ─────────────────────────────────────────────
   useEffect(() => {
     if (!isSupabaseEnabled || !supabase) return;
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) syncUser(session.user);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) await syncUser(session.user);
-      else if (event === 'SIGNED_OUT') { setUser(null); persist('fennec_user', null); }
+    // IMPORTANT : ne jamais appeler d'API Supabase directement dans le callback
+    // onAuthStateChange — il détient le verrou d'auth et toute requête interne
+    // (getSession) provoque un interblocage qui gèle toutes les requêtes DB.
+    // On planifie donc syncUser hors du callback via setTimeout.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session?.user) {
+        const u = session.user;
+        setTimeout(() => { syncUser(u); }, 0);
+      } else if (event === 'SIGNED_OUT') { setUser(null); persist('fennec_user', null); }
     });
 
     return () => subscription.unsubscribe();
@@ -160,6 +169,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setUserListings(mapped);
       persist('fennec_my_listings', mapped);
     }
+
+    // Threads + messages depuis Supabase (sinon la messagerie ne suit pas l'utilisateur)
+    const { data: ths } = await supabase
+      .from('threads')
+      .select('*, messages(*)')
+      .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`)
+      .order('created_at', { ascending: false });
+    if (ths && ths.length > 0) {
+      const mappedThreads: MessageThread[] = ths.map((row: any) => ({
+        id: row.id,
+        userId: row.seller_id === userId ? row.buyer_id : row.seller_id,
+        userName: row.seller_id === userId ? 'Acheteur' : 'Vendeur',
+        userAvatar: '',
+        listingId: row.listing_id,
+        listingTitle: row.listing_title,
+        listingImage: row.listing_image,
+        listingPrice: row.listing_price,
+        messages: (row.messages || [])
+          .sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+          .map((m: any) => ({ id: m.id, from: m.from_user, text: m.text, ts: new Date(m.created_at).getTime(), read: m.read })),
+        unread: row.buyer_id === userId ? row.unread_buyer : row.unread_seller,
+        lastTs: row.last_ts ? new Date(row.last_ts).getTime() : undefined,
+      }));
+      setThreads(mappedThreads);
+      persist('fennec_threads', mappedThreads);
+    }
   }
 
   // ── Fetch public listings from Supabase ───────────────────────────────
@@ -173,7 +208,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         .select('*')
         .eq('status', 'active')
         .order('created_at', { ascending: false })
-        .limit(500);
+        .limit(1000);
       if (!error && data && data.length > 0) {
         setDbListings(data.map(dbToListing));
       }
@@ -327,7 +362,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const listing = listings.find(l => l.id === listingId);
     const thread: MessageThread = {
-      id: `thread_${Date.now()}`, userId: sellerId,
+      // UUID obligatoire : la colonne threads.id est de type uuid côté Supabase
+      id: crypto.randomUUID(), userId: sellerId,
       userName: 'Vendeur', userAvatar: '',
       listingId, listingTitle: listing?.title || '',
       listingImage: listing?.imageUrl, listingPrice: listing?.price,
@@ -342,8 +378,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         id: thread.id, listing_id: listingId, buyer_id: user.id, seller_id: sellerId || null,
         listing_title: listing?.title || '', listing_image: listing?.imageUrl, listing_price: listing?.price,
       }).then(({ error }) => {
-        if (!error && firstMsg) {
-          supabase.from('messages').insert({ thread_id: thread.id, from_user: user.id, text: firstMsg, read: false, type: 'text' }).then();
+        if (error) { console.warn('Supabase thread insert error:', error.message); return; }
+        if (firstMsg) {
+          supabase.from('messages').insert({ thread_id: thread.id, from_user: user.id, text: firstMsg, read: false, type: 'text' })
+            .then(({ error: e2 }) => { if (e2) console.warn('Supabase message insert error:', e2.message); });
         }
       });
     }
