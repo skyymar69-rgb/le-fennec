@@ -1,8 +1,7 @@
 import React, { useState, useRef, useCallback, useMemo } from 'react';
 import { ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { WILAYAS } from '../../data/wilayas';
-import { ALGERIA_SVG_PATHS, ALGERIA_SVG_VIEWBOX } from '../../data/algeriaSvgPaths';
+import { WILAYA_PATHS } from '../../data/wilayaPaths';
 
 interface Props {
   onSelectWilaya?: (code: string, name: string) => void;
@@ -12,17 +11,17 @@ interface Props {
   listingCounts?:   Record<string, number>;
 }
 
-// Dimensions du viewBox de la carte source (algeria-interractive-map)
-const VB_W = 286.086;
-const VB_H = 298.332;
+// Tracés officiels simplemaps — découpage actuel 58 wilayas, viewBox 0 0 1000 1000
+const VB = 1000;
 
 // Couleurs — fond de carte vert Algérie
-const BG_GREEN       = '#006233';  // vert du drapeau algérien (fond)
-const HOVER_GREEN    = '#00E070';
-const SELECTED_GOLD  = '#FFD700';
+const BG_GREEN      = '#006233';  // vert du drapeau algérien (fond)
+const HOVER_GREEN   = '#00E070';
+const SELECTED_GOLD = '#FFD700';
 
-const NAME_BY_CODE: Record<string, { fr: string; ar: string; en: string }> = {};
-WILAYAS.forEach(w => { NAME_BY_CODE[w.code] = { fr: w.nameFr, ar: w.nameAr, en: w.nameEn }; });
+const WILAYA_LIST = Object.entries(WILAYA_PATHS)
+  .map(([code, w]) => ({ code, ...w }))
+  .sort((a, b) => a.code.localeCompare(b.code));
 
 const AlgeriaMap: React.FC<Props> = ({
   onSelectWilaya, selectedWilaya, className = '', compact = false, listingCounts,
@@ -35,10 +34,10 @@ const AlgeriaMap: React.FC<Props> = ({
   const wrapRef = useRef<HTMLDivElement>(null);
   const { language } = useLanguage();
 
-  const getName = useCallback((code: string, fallback: string) => {
-    const n = NAME_BY_CODE[code];
-    if (!n) return fallback;
-    return language === 'ar' ? n.ar : language === 'en' ? n.en : n.fr;
+  const getName = useCallback((code: string) => {
+    const w = WILAYA_PATHS[code];
+    if (!w) return code;
+    return language === 'ar' ? w.nameAr : language === 'en' ? w.nameEn : w.nameFr;
   }, [language]);
 
   const maxCount = useMemo(() =>
@@ -56,8 +55,8 @@ const AlgeriaMap: React.FC<Props> = ({
 
   // ── Zoom / pan ──────────────────────────────────────────────────────────
   const clampPan = (p: { x: number; y: number }, s: number) => ({
-    x: Math.max(-VB_W * (s - 1), Math.min(0, p.x)),
-    y: Math.max(-VB_H * (s - 1), Math.min(0, p.y)),
+    x: Math.max(-VB * (s - 1), Math.min(0, p.x)),
+    y: Math.max(-VB * (s - 1), Math.min(0, p.y)),
   });
 
   const zoomBy = (f: number) => {
@@ -90,7 +89,7 @@ const AlgeriaMap: React.FC<Props> = ({
     const dy = e.clientY - dragRef.current.y;
     if (Math.abs(dx) + Math.abs(dy) > 4) dragRef.current.moved = true;
     if (scale > 1 && rect) {
-      const k = VB_W / rect.width / scale;
+      const k = VB / rect.width / scale;
       setPan(clampPan({ x: dragRef.current.px + dx * k * scale, y: dragRef.current.py + dy * k * scale }, scale));
     }
   };
@@ -102,12 +101,10 @@ const AlgeriaMap: React.FC<Props> = ({
     onSelectWilaya?.(code, name);
   };
 
-  const hoveredData = hovered ? ALGERIA_SVG_PATHS.find(w => w.code === hovered) : null;
-
   return (
     <div ref={wrapRef} className={`relative select-none ${className}`}>
       <svg
-        viewBox={ALGERIA_SVG_VIEWBOX}
+        viewBox={`0 0 ${VB} ${VB}`}
         className="w-full h-auto rounded-2xl"
         style={{ background: `radial-gradient(120% 120% at 30% 15%, #0a7a43 0%, ${BG_GREEN} 55%, #004a26 100%)`, touchAction: 'none', cursor: scale > 1 ? 'grab' : 'pointer' }}
         onWheel={onWheel}
@@ -116,18 +113,18 @@ const AlgeriaMap: React.FC<Props> = ({
         onPointerUp={onPointerUp}
         onPointerLeave={() => { setHovered(null); setTooltip(null); dragRef.current = null; }}
         role="img"
-        aria-label="Carte interactive de l'Algérie — 48 wilayas"
+        aria-label="Carte interactive de l'Algérie — 58 wilayas"
       >
         <g transform={`translate(${pan.x} ${pan.y}) scale(${scale})`}>
-          {ALGERIA_SVG_PATHS.map(w => {
-            const name = getName(w.code, w.name);
+          {WILAYA_LIST.map(w => {
+            const name = getName(w.code);
             return (
               <path
                 key={w.code}
-                d={w.d}
+                d={w.path}
                 fill={getFill(w.code)}
                 stroke="#ffffff"
-                strokeWidth={0.4 / scale}
+                strokeWidth={1.4 / scale}
                 strokeLinejoin="round"
                 style={{ transition: 'fill 0.15s ease' }}
                 onPointerEnter={() => setHovered(w.code)}
@@ -161,7 +158,7 @@ const AlgeriaMap: React.FC<Props> = ({
       )}
 
       {/* Tooltip */}
-      {hoveredData && tooltip && (
+      {hovered && tooltip && (
         <div
           className="absolute z-10 pointer-events-none px-2.5 py-1.5 rounded-lg bg-black/85 text-white text-xs shadow-lg whitespace-nowrap"
           style={{
@@ -169,10 +166,10 @@ const AlgeriaMap: React.FC<Props> = ({
             top:  Math.max(tooltip.y - 38, 4),
           }}
         >
-          <span className="font-bold">{hoveredData.code} — {getName(hoveredData.code, hoveredData.name)}</span>
+          <span className="font-bold">{hovered} — {getName(hovered)}</span>
           {listingCounts && (
             <span className="block text-white/70">
-              {(listingCounts[hoveredData.code] || 0).toLocaleString()} annonces
+              {(listingCounts[hovered] || 0).toLocaleString()} annonces
             </span>
           )}
         </div>
